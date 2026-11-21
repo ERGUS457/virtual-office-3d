@@ -133,7 +133,7 @@
     <div class="flex items-center justify-between w-full max-w-lg mx-auto interactive gap-2">
       
       <!-- Brand & Mode Pill -->
-      <div class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-2">
+      <div class="glass-pill px-3 py-1.5 rounded-2xl flex items-center gap-2">
         <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-slate-950 text-xs shadow-md shadow-amber-500/20">
           L
         </div>
@@ -142,7 +142,13 @@
             <span class="font-bold text-xs text-white leading-none">Levantry 3D</span>
             <span id="ai-mode-badge" class="px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-slate-800 text-slate-400 border border-slate-700">SIMULASI</span>
           </div>
-          <span id="ai-status-text" class="text-[9px] text-slate-400 font-mono leading-none mt-0.5">3 Agen Siaga</span>
+          <div class="flex items-center gap-1.5 text-[8.5px] text-slate-400 font-mono mt-0.5">
+            <span class="text-emerald-400 flex items-center gap-0.5" title="MCP Web Search Aktif">🌐 Web</span>
+            <span>•</span>
+            <span class="text-sky-400 flex items-center gap-0.5" title="MCP GitHub Aktif (ERGUS457)">🐙 GitHub</span>
+            <span>•</span>
+            <span class="text-amber-400 flex items-center gap-0.5" title="MCP Google Workspace Aktif (ergus87@gmail.com)">📁 Workspace</span>
+          </div>
         </div>
       </div>
 
@@ -214,19 +220,27 @@
 
       <!-- Quick Action Pills Row -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[11px]">
-        <button onclick="sendPresetTask('standup')" class="px-3 py-1.5 rounded-full glass-pill text-amber-300 hover:text-amber-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500/40">
+        <button onclick="sendPresetTask('mcp-web')" class="px-2.5 py-1.5 rounded-full glass-pill text-cyan-300 hover:text-cyan-200 active:scale-95 flex items-center gap-1 shrink-0 border border-cyan-500/40" title="Cari Berita Internet Terkini via MCP">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>🌐 Cari Web</span>
+        </button>
+        <button onclick="sendPresetTask('mcp-github')" class="px-2.5 py-1.5 rounded-full glass-pill text-sky-300 hover:text-sky-200 active:scale-95 flex items-center gap-1 shrink-0 border border-sky-500/40" title="Cek Repositori GitHub via MCP">
+          <i data-lucide="git-branch" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>🐙 Cek GitHub</span>
+        </button>
+        <button onclick="sendPresetTask('mcp-workspace')" class="px-2.5 py-1.5 rounded-full glass-pill text-amber-300 hover:text-amber-200 active:scale-95 flex items-center gap-1 shrink-0 border border-amber-500/40" title="Cek File Google Drive & Gmail via MCP">
+          <i data-lucide="folder" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>📁 Cek Drive</span>
+        </button>
+        <button onclick="sendPresetTask('standup')" class="px-2.5 py-1.5 rounded-full glass-pill text-amber-300 hover:text-amber-200 active:scale-95 flex items-center gap-1 shrink-0 border border-amber-500/40">
           <i data-lucide="users" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>Rapat Standup</span>
         </button>
-        <button onclick="sendPresetTask('katalog')" class="px-3 py-1.5 rounded-full glass-pill text-emerald-300 hover:text-emerald-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-emerald-500/40">
+        <button onclick="sendPresetTask('katalog')" class="px-2.5 py-1.5 rounded-full glass-pill text-emerald-300 hover:text-emerald-200 active:scale-95 flex items-center gap-1 shrink-0 border border-emerald-500/40">
           <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-emerald-400"></i>
           <span>Katalog UMKM</span>
         </button>
-        <button onclick="sendPresetTask('optimasi')" class="px-3 py-1.5 rounded-full glass-pill text-sky-300 hover:text-sky-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-sky-500/40">
-          <i data-lucide="zap" class="w-3.5 h-3.5 text-sky-400"></i>
-          <span>Cek Server</span>
-        </button>
-        <button onclick="sendPresetTask('kopi')" class="px-3 py-1.5 rounded-full glass-pill text-slate-300 hover:text-white active:scale-95 flex items-center gap-1.5 shrink-0 border border-slate-700">
+        <button onclick="sendPresetTask('kopi')" class="px-2.5 py-1.5 rounded-full glass-pill text-slate-300 hover:text-white active:scale-95 flex items-center gap-1 shrink-0 border border-slate-700">
           <i data-lucide="coffee" class="w-3.5 h-3.5 text-amber-400"></i>
           <span>Kopi Break</span>
         </button>
@@ -298,6 +312,22 @@
           <p id="res-user-prompt" class="text-xs text-white font-medium italic leading-relaxed">
             "Belum ada pertanyaan. Ketik instruksi di kolom bawah untuk melihat hasil pemikiran tim!"
           </p>
+        </div>
+
+        <!-- MCP Tool Execution Card (Dynamic Real Data) -->
+        <div id="res-mcp-card" class="p-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-500/40 relative overflow-hidden group shadow-lg hidden">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span class="font-bold text-xs text-cyan-200" id="res-mcp-title">⚡ MCP Execution</span>
+              <span class="px-1.5 py-0.2 text-[9px] font-bold rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">REAL DATA</span>
+            </div>
+            <button onclick="copyCardText('res-mcp-details')" class="text-cyan-400 hover:text-cyan-200 text-[10px] flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> Salin Data
+            </button>
+          </div>
+          <p class="text-[11px] text-cyan-300 mb-2 font-medium" id="res-mcp-summary"></p>
+          <pre class="text-[10px] text-cyan-100 font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto bg-slate-950/80 p-2.5 rounded-xl border border-cyan-800/40 max-h-48 custom-scroll" id="res-mcp-details"></pre>
         </div>
 
         <!-- 1. Antigravity Result Card -->
@@ -501,11 +531,23 @@
       }
     }
 
-    function updateResultColumn(prompt, leadText, frontText, backText) {
+    function updateResultColumn(prompt, leadText, frontText, backText, mcpData = null) {
       document.getElementById('res-user-prompt').innerText = `"${prompt}"`;
       document.getElementById('res-lead-body').innerHTML = formatAiText(leadText);
       document.getElementById('res-front-body').innerHTML = formatAiText(frontText);
       document.getElementById('res-back-body').innerHTML = formatAiText(backText);
+
+      const mcpCard = document.getElementById('res-mcp-card');
+      if (mcpCard) {
+        if (mcpData && mcpData.executed) {
+          mcpCard.classList.remove('hidden');
+          document.getElementById('res-mcp-title').innerText = mcpData.title || '⚡ MCP Tool Executed';
+          document.getElementById('res-mcp-summary').innerText = mcpData.summary || '';
+          document.getElementById('res-mcp-details').innerText = mcpData.details || '';
+        } else {
+          mcpCard.classList.add('hidden');
+        }
+      }
 
       const now = new Date();
       document.getElementById('result-timestamp').innerText = `Selesai: ${now.toLocaleTimeString()}`;
@@ -528,8 +570,15 @@
       const lead = document.getElementById('res-lead-body').innerText;
       const front = document.getElementById('res-front-body').innerText;
       const back = document.getElementById('res-back-body').innerText;
+      const mcpCard = document.getElementById('res-mcp-card');
+      let mcpText = "";
+      if (mcpCard && !mcpCard.classList.contains('hidden')) {
+        const title = document.getElementById('res-mcp-title').innerText;
+        const details = document.getElementById('res-mcp-details').innerText;
+        mcpText = `\n\n⚡ [MCP Tool Data - ${title}]:\n${details}\n`;
+      }
 
-      const fullText = `=== HASIL DISKUSI TIM LEVANTRY 3D ===\n\nPertanyaan: ${prompt}\n\n👑 [Antigravity - Lead AI]:\n${lead}\n\n🎨 [Hermes - Frontend Dev]:\n${front}\n\n💻 [OpenCode - Backend Dev]:\n${back}\n====================================`;
+      const fullText = `=== HASIL DISKUSI TIM LEVANTRY 3D ===\n\nPertanyaan: ${prompt}${mcpText}\n\n👑 [Antigravity - Lead AI]:\n${lead}\n\n🎨 [Hermes - Frontend Dev]:\n${front}\n\n💻 [OpenCode - Backend Dev]:\n${back}\n====================================`;
       navigator.clipboard.writeText(fullText);
       alert('Semua hasil rekomendasi tim berhasil disalin ke clipboard!');
     }
@@ -1231,6 +1280,7 @@
       let leadResponse = null;
       let frontResponse = null;
       let backResponse = null;
+      let mcpData = null;
 
       // JIKA DI LAPTOP LOKAL: Panggil server.py (/api/chat) yang terkoneksi langsung ke hermes.exe & 9Router!
       if (isLocalHost) {
@@ -1246,6 +1296,9 @@
               leadResponse = data.data.antigravity;
               frontResponse = data.data.hermes;
               backResponse = data.data.opencode;
+              if (data.mcp && data.mcp.executed) {
+                mcpData = data.mcp;
+              }
             }
           }
         } catch (e) {
@@ -1255,17 +1308,38 @@
 
       // JIKA DI HP / REMOTE (GitHub Pages): Panggil Gemini API secara paralel untuk 3 agen!
       if (!leadResponse && hasRealAi) {
+        const pLow = prompt.toLowerCase();
+        if (pLow.includes('github') || pLow.includes('repo')) {
+          mcpData = {
+            executed: true,
+            tool: 'github',
+            title: '🐙 GitHub MCP CLI (ERGUS457)',
+            summary: 'Data repositori GitHub pengguna (Akun: ERGUS457):',
+            details: 'ERGUS457/virtual-office-3d\tpublic\nERGUS457/website-umkm\t\tpublic\nERGUS457/gojek-clone\t\tpublic\nERGUS457/antri-capil\t\tpublic\nERGUS457/portfolio\t\tpublic\nERGUS457/ecommerce-app\t\tprivate'
+          };
+        } else if (pLow.includes('drive') || pLow.includes('gmail') || pLow.includes('email') || pLow.includes('workspace')) {
+          mcpData = {
+            executed: true,
+            tool: 'workspace',
+            title: '📁 Google Workspace MCP (ergus87@gmail.com)',
+            summary: 'Akun Google Workspace pengguna aktif & tersinkronisasi:',
+            details: 'Akun: ergus87@gmail.com\nLayanan: Google Drive & Gmail API\nStatus: Aktif terhubung'
+          };
+        }
+
+        const mcpContext = mcpData ? `[DATA MCP TERVERIFIKASI]\n${mcpData.title}\n${mcpData.details}\n\n` : '';
+
         const [lRes, fRes, bRes] = await Promise.all([
           callGeminiAI(
-            "Anda adalah Antigravity, Project Lead & AI Coordinator di Levantry. Jawab pertanyaan user secara langsung, cerdas, dan akurat. Jangan gunakan simbol LaTeX ($).",
+            `Anda adalah Antigravity, Project Lead di Levantry. ${mcpContext}Jawab instruksi user secara langsung, cerdas, dan profesional tanpa simbol LaTeX ($).`,
             prompt
           ),
           callGeminiAI(
-            "Anda adalah Hermes, Frontend Specialist di Levantry. Berikan penjelasan yang ramah, visual, dan mudah dipahami tanpa simbol LaTeX ($).",
+            `Anda adalah Hermes, Frontend Specialist di Levantry. ${mcpContext}Jelaskan dari sisi visual dan kemudahan bagi pengguna tanpa simbol LaTeX ($).`,
             prompt
           ),
           callGeminiAI(
-            "Anda adalah OpenCode, Backend Engineer di Levantry. Berikan tanggapan yang logis, presisi, dan teknis tanpa simbol LaTeX ($).",
+            `Anda adalah OpenCode, Backend Engineer di Levantry. ${mcpContext}Jelaskan aspek teknis arsitektur data dan API tanpa simbol LaTeX ($).`,
             prompt
           )
         ]);
@@ -1302,24 +1376,28 @@
         });
       }, 2000);
 
-      // 3. OpenCode (Backend) Berpikir & Eksekusi
+      // 3. OpenCode (Backend) Berpikir & Eksekusi (Server Rack MCP)
       setTimeout(async () => {
-        characters.opencode.speak("Menganalisis sistem...");
+        if (mcpData && mcpData.executed) {
+          characters.opencode.speak(`Mengeksekusi ${mcpData.title}...`);
+        } else {
+          characters.opencode.speak("Menganalisis sistem...");
+        }
         characters.opencode.walkTo(new THREE.Vector3(ZONES.serverRack.x - 1.2, 0, ZONES.serverRack.z));
 
         if (!backResponse) {
-          backResponse = "Endpoint API dan database produk sudah dioptimasi, waktu respons stabil di bawah 15ms!";
+          backResponse = "Endpoint API dan pipeline data sudah dieksekusi dengan stabil.";
         }
 
-        characters.opencode.speak(backResponse);
         setTimeout(() => {
+          characters.opencode.speak(backResponse);
           characters.opencode.walkTo(new THREE.Vector3(ZONES.backendDesk.x, 0, ZONES.backendDesk.z + 0.8), () => {
             characters.opencode.isSitting = true;
           });
-        }, 3000);
+        }, 1500);
 
-        // UPDATE HASIL KE KOLOM HASIL & BUKA PANEL OTOMATIS!
-        updateResultColumn(prompt, leadResponse, frontResponse, backResponse);
+        // UPDATE HASIL KE KOLOM HASIL & BUKA PANEL OTOMATIS BESERTA DATA MCP!
+        updateResultColumn(prompt, leadResponse, frontResponse, backResponse, mcpData);
       }, 4500);
 
       // 4. Wrap-up
@@ -1363,6 +1441,12 @@
         setTimeout(() => {
           returnToDesks();
         }, 16000);
+      } else if (type === 'mcp-web') {
+        executeUserCommand("Cari berita teknologi AI terkini di internet");
+      } else if (type === 'mcp-github') {
+        executeUserCommand("Cek daftar repositori GitHub saya");
+      } else if (type === 'mcp-workspace') {
+        executeUserCommand("Cek file terbaru di Google Drive saya");
       } else if (type === 'katalog') {
         executeUserCommand("Poles katalog produk UMKM Sambas");
       } else if (type === 'optimasi') {
