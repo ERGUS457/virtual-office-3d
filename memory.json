@@ -1,0 +1,42 @@
+{
+  "profile": {
+    "user_name": "Ergus",
+    "organization": "Levantry HQ",
+    "role": "Founder & Lead Director",
+    "github_user": "ERGUS457",
+    "email": "ergus87@gmail.com"
+  },
+  "projects": [
+    {
+      "name": "Website UMKM Sambas Berjaya",
+      "status": "Sedang Berjalan",
+      "description": "Platform digital untuk memamerkan produk tenun, kuliner, dan kriya khas Sambas dengan katalog interaktif dan checkout WhatsApp."
+    },
+    {
+      "name": "Levantry 3D Virtual Office",
+      "status": "Aktif & Terintegrasi",
+      "description": "Kantor virtual multi-agen 3D bertenaga Gemini 3.8 Flash, dilengkapi integrasi MCP (Live Web Search, GitHub CLI, Google Workspace)."
+    }
+  ],
+  "decisions": [
+    "Semua respons teks dari Antigravity, Hermes, dan OpenCode wajib menggunakan teks bersih tanpa sintaks LaTeX dolar ($).",
+    "Model utama tim AI menggunakan Gemini 3.8 Flash untuk kecepatan analisis dan inferensi real-time.",
+    "Hermes bertanggung jawab atas UI responsif Tailwind CSS, OpenCode memegang kendali database & server, dan Antigravity mengoordinasikan sprint."
+  ],
+  "conversations": [
+    {
+      "user": "Nama saya Ergus dan saya mau fokus selesaikan fitur keranjang belanja website UMKM Sambas.",
+      "antigravity": "Siap, Boss Ergus. Saya akan koordinasikan OpenCode untuk mematangkan backend database keranjang dan Hermes untuk menyempurnakan UI-nya agar fitur *checkout* WhatsApp Website UMKM Sambas Berjaya bisa segera rampung.",
+      "hermes": "Halo Boss Ergus, siap membantu Anda memaksimalkan fitur keranjang belanja dan *checkout* WhatsApp pada website UMKM Sambas Berjaya menggunakan Tailwind CSS yang responsif dan elegan. Mari kita tuntaskan sprint ini dengan performa terbaik!",
+      "opencode": "Siap, Boss Ergus. Saya akan segera fokus merancang logika backend dan struktur database untuk fitur keranjang belanja dan *checkout* WhatsApp pada website UMKM Sambas Berjaya agar berjalan lancar dan optimal.",
+      "tool_used": null
+    },
+    {
+      "user": "Menurut kamu tadi, siapa nama saya dan apa fitur prioritas yang ingin kita selesaikan?",
+      "antigravity": "Nama Anda adalah Boss Ergus, Founder & Lead Director di Levantry HQ. Fitur prioritas yang sedang kita selesaikan saat ini adalah pengembangan sistem keranjang belanja untuk website UMKM Sambas Berjaya, di mana OpenCode dan Hermes sedang mengoordinasikan backend serta UI-nya.",
+      "hermes": "Halo Boss Ergus, nama Anda adalah Ergus selaku Founder dan Lead Director Levantry HQ, dan fitur prioritas yang sedang kita selesaikan saat ini adalah keranjang belanja untuk website UMKM Sambas Berjaya.",
+      "opencode": "Halo Boss Ergus, nama Anda adalah Ergus selaku Founder & Lead Director Levantry HQ, dan fitur prioritas yang sedang kita selesaikan adalah backend database serta integrasi keranjang belanja untuk website UMKM Sambas Berjaya.",
+      "tool_used": "web_search"
+    }
+  ]
+}

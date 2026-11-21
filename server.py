@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 PORT = 3333
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+MEMORY_FILE = os.path.join(DIRECTORY, "memory.json")
 
 ROUTER_URL = "http://localhost:20128/v1/chat/completions"
 ROUTER_KEY = "sk-0900c4ba0ad55579-ohgl0d-7ddf1c78"
@@ -26,13 +27,111 @@ def clean_text(text):
     return text.strip()
 
 # ==========================================
+# PERSISTENT LONG-TERM MEMORY (LTM) SYSTEM
+# ==========================================
+
+def load_memory():
+    if not os.path.exists(MEMORY_FILE):
+        default_mem = {
+            "profile": {
+                "user_name": "Ergus",
+                "organization": "Levantry HQ",
+                "role": "Founder & Lead Director",
+                "github_user": "ERGUS457",
+                "email": "ergus87@gmail.com"
+            },
+            "projects": [
+                {
+                    "name": "Website UMKM Sambas Berjaya",
+                    "status": "Sedang Berjalan",
+                    "description": "Platform digital untuk memamerkan produk tenun, kuliner, dan kriya khas Sambas dengan katalog interaktif dan checkout WhatsApp."
+                },
+                {
+                    "name": "Levantry 3D Virtual Office",
+                    "status": "Aktif & Terintegrasi",
+                    "description": "Kantor virtual multi-agen 3D bertenaga Gemini 3.8 Flash, dilengkapi integrasi MCP (Live Web Search, GitHub CLI, Google Workspace)."
+                }
+            ],
+            "decisions": [
+                "Semua respons teks dari Antigravity, Hermes, dan OpenCode wajib menggunakan teks bersih tanpa sintaks LaTeX dolar ($).",
+                "Model utama tim AI menggunakan Gemini 3.8 Flash untuk kecepatan analisis dan inferensi real-time.",
+                "Hermes bertanggung jawab atas UI responsif Tailwind CSS, OpenCode memegang kendali database & server, dan Antigravity mengoordinasikan sprint."
+            ],
+            "conversations": []
+        }
+        save_memory(default_mem)
+        return default_mem
+    try:
+        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"[Memory Error]: {e}", file=sys.stderr)
+        return {"conversations": [], "decisions": [], "projects": [], "profile": {}}
+
+def save_memory(mem):
+    try:
+        with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+            json.dump(mem, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"[Memory Save Error]: {e}", file=sys.stderr)
+
+def build_memory_context():
+    mem = load_memory()
+    profile = mem.get("profile", {})
+    projects = mem.get("projects", [])
+    decisions = mem.get("decisions", [])
+    convs = mem.get("conversations", [])
+
+    lines = [
+        "[MEMORI JANGKA PANJANG & KNOWLEDGE BASE KANTOR LEVANTRY]",
+        f"Profil User: {profile.get('user_name', 'Ergus')} ({profile.get('role', 'Owner')}, {profile.get('organization', 'Levantry')})",
+        f"Akun Terkoneksi: GitHub: {profile.get('github_user', 'ERGUS457')}, Email: {profile.get('email', 'ergus87@gmail.com')}"
+    ]
+
+    if projects:
+        p_lines = [f"• {p['name']} [{p.get('status', 'Active')}]: {p.get('description', '')}" for p in projects[:2]]
+        lines.append("Proyek Aktif:\n" + "\n".join(p_lines))
+
+    if decisions:
+        d_lines = [f"• {d}" for d in decisions[-3:]]
+        lines.append("Keputusan & Arahan Tetap Tim:\n" + "\n".join(d_lines))
+
+    # Add last 3 conversational turns for dialogue continuity
+    recent_convs = convs[-3:]
+    if recent_convs:
+        lines.append("Riwayat Pembahasan Terakhir:")
+        for i, c in enumerate(recent_convs, 1):
+            u_text = c.get("user", "")
+            lead_summary = c.get("antigravity", "")
+            lines.append(f"  [Diskusi #{i}] User: '{u_text}' -> Arahan Tim: '{lead_summary[:120]}...'")
+
+    return "\n".join(lines)
+
+def record_turn(user_prompt, antigravity_res, hermes_res, opencode_res, tool_name=None):
+    mem = load_memory()
+    if "conversations" not in mem:
+        mem["conversations"] = []
+    
+    turn = {
+        "user": user_prompt,
+        "antigravity": antigravity_res,
+        "hermes": hermes_res,
+        "opencode": opencode_res,
+        "tool_used": tool_name
+    }
+    mem["conversations"].append(turn)
+    # Keep rolling buffer of last 15 turns
+    if len(mem["conversations"]) > 15:
+        mem["conversations"] = mem["conversations"][-15:]
+    save_memory(mem)
+
+# ==========================================
 # MCP TOOL IMPLEMENTATIONS
 # ==========================================
 
 def mcp_github(query=""):
     print(f"[MCP-GitHub] Checking for query: '{query}'")
     try:
-        # Check if asking for specific repository
         m = re.search(r"repo(?:sitory)?\s+([a-zA-Z0-9_\-]+)", query, re.IGNORECASE)
         skip_words = {"github", "saya", "ku", "kami", "ada", "list", "daftar", "cek", "semua"}
         if m and m.group(1).lower() not in skip_words:
@@ -41,7 +140,6 @@ def mcp_github(query=""):
             if res.returncode == 0 and res.stdout.strip():
                 return f"Detail Repositori GitHub ERGUS457/{target}:\n{res.stdout.strip()[:400]}"
 
-        # Default: list repositories
         res = subprocess.run(["gh", "repo", "list", "ERGUS457", "--limit", "6"], capture_output=True, text=True, timeout=10)
         if res.returncode == 0 and res.stdout.strip():
             return "Daftar Repositori GitHub (Akun: ERGUS457):\n" + res.stdout.strip()
@@ -191,7 +289,7 @@ def call_9router(system_prompt, user_prompt, model="levantry"):
                 "Authorization": f"Bearer {ROUTER_KEY}"
             }
         )
-        with urllib.request.urlopen(req, timeout=12) as response:
+        with urllib.request.urlopen(req, timeout=14) as response:
             res_data = json.loads(response.read().decode("utf-8"))
             raw_text = res_data["choices"][0]["message"]["content"].strip()
             return clean_text(raw_text)
@@ -199,33 +297,33 @@ def call_9router(system_prompt, user_prompt, model="levantry"):
         print(f"[9Router Error]: {e}", file=sys.stderr)
         return None
 
-def get_antigravity_response(prompt, mcp_context=""):
-    full_prompt = f"{mcp_context}\n\nInstruksi: {prompt}" if mcp_context else prompt
+def get_antigravity_response(prompt, context=""):
+    full_prompt = f"{context}\n\nInstruksi User: {prompt}" if context else prompt
     sys_prompt = (
         "Anda adalah Antigravity, Project Lead & AI Coordinator di Levantry Office. "
-        "Tanggapi pertanyaan user secara langsung, cerdas, dan lugas. "
-        "Jika terdapat data hasil eksekusi MCP tool, simpulkan poin kuncinya untuk user secara profesional. "
-        "Jika pertanyaan umum/matematika, jawab hasilnya dengan tepat tanpa memaksakan topik yang tidak relevan. "
+        "Gunakan memori jangka panjang dan data nyata di atas untuk menjaga kesinambungan diskusi proyek. "
+        "Tanggapi pertanyaan user secara langsung, cerdas, dan profesional. "
+        "Jika ada pembahasan sebelumnya, rujuk secara alami tanpa mengulang kalimat kaku. "
         "Hindari simbol rumus LaTeX dolar ($)."
     )
     return call_9router(sys_prompt, full_prompt) or f"Instruksi diterima: '{prompt}'. Saya koordinasikan solusinya bersama tim."
 
-def get_hermes_response(prompt, mcp_context=""):
-    full_prompt = f"{mcp_context}\n\nInstruksi: {prompt}" if mcp_context else prompt
+def get_hermes_response(prompt, context=""):
+    full_prompt = f"{context}\n\nInstruksi User: {prompt}" if context else prompt
     sys_prompt = (
         "Anda adalah Hermes, Frontend & UI/UX Specialist di Levantry Office. "
-        "Berikan tanggapan yang ramah, visual, dan jelas. "
-        "Jika ada data hasil eksekusi MCP tool, jelaskan bagaimana data tersebut dapat ditampilkan pada antarmuka atau bermanfaat untuk user experience. "
+        "Gunakan memori tim di atas untuk melanjutkan desain dan antarmuka web secara konsisten. "
+        "Berikan tanggapan yang ramah, visual, dan jelas untuk kenyamanan pengguna. "
         "Hindari format matematika LaTeX ($)."
     )
     return call_9router(sys_prompt, full_prompt) or "Tampilan visual dan antarmuka interaktif siap kami integrasikan."
 
-def get_opencode_response(prompt, mcp_context=""):
-    full_prompt = f"{mcp_context}\n\nInstruksi: {prompt}" if mcp_context else prompt
+def get_opencode_response(prompt, context=""):
+    full_prompt = f"{context}\n\nInstruksi User: {prompt}" if context else prompt
     sys_prompt = (
         "Anda adalah OpenCode, Backend Engineer & Database Architect di Levantry Office. "
-        "Berikan tanggapan logis, teknis, dan presisi. "
-        "Jika ada data hasil eksekusi MCP tool, jelaskan aspek teknis, API endpoint, atau integrasi data dari hasil tersebut. "
+        "Gunakan memori tim dan data sistem di atas untuk menjaga konsistensi API, server, dan skema data. "
+        "Berikan tanggapan teknis yang logis, presisi, dan terverifikasi. "
         "Hindari format rumus LaTeX dolar ($)."
     )
     return call_9router(sys_prompt, full_prompt) or "Infrastruktur server dan pipeline data siap mengeksekusi instruksi ini."
@@ -248,7 +346,60 @@ class OfficeRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
+    def do_GET(self):
+        if self.path == "/api/memory":
+            mem = load_memory()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok", "memory": mem}).encode("utf-8"))
+            return
+
+        super().do_GET()
+
     def do_POST(self):
+        # 1. Tambah Keputusan Permanen Baru
+        if self.path == "/api/memory/decision":
+            content_length = int(self.headers.get("Content-Length", 0))
+            post_body = self.rfile.read(content_length)
+            try:
+                data = json.loads(post_body.decode("utf-8"))
+                dec = data.get("decision", "").strip()
+                if dec:
+                    mem = load_memory()
+                    if "decisions" not in mem:
+                        mem["decisions"] = []
+                    mem["decisions"].append(dec)
+                    save_memory(mem)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "ok", "message": "Keputusan disimpan ke memori jangka panjang."}).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+                return
+
+        # 2. Reset Riwayat Percakapan
+        if self.path == "/api/memory/clear":
+            try:
+                mem = load_memory()
+                mem["conversations"] = []
+                save_memory(mem)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "ok", "message": "Riwayat percakapan berhasil dibersihkan."}).encode("utf-8"))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode("utf-8"))
+                return
+
+        # 3. Chat Pipeline dengan Persistent Memory + MCP Tool Calling
         if self.path == "/api/chat":
             content_length = int(self.headers.get("Content-Length", 0))
             post_body = self.rfile.read(content_length)
@@ -256,25 +407,49 @@ class OfficeRequestHandler(http.server.SimpleHTTPRequestHandler):
                 req_json = json.loads(post_body.decode("utf-8"))
                 prompt = req_json.get("prompt", "").strip()
 
-                # 1. MCP Tool Dispatching
+                # A. Build Persistent Memory Context
+                mem_context = build_memory_context()
+
+                # B. MCP Tool Dispatching
                 mcp_meta, mcp_context = dispatch_mcp_tool(prompt)
 
-                # 2. Parallel LLM Agent execution
+                # Combined Context
+                context_parts = []
+                if mem_context:
+                    context_parts.append(mem_context)
+                if mcp_context:
+                    context_parts.append(mcp_context)
+                full_context = "\n\n".join(context_parts)
+
+                # C. Parallel LLM Agent execution
                 with ThreadPoolExecutor(max_workers=3) as executor:
-                    f_lead = executor.submit(get_antigravity_response, prompt, mcp_context)
-                    f_front = executor.submit(get_hermes_response, prompt, mcp_context)
-                    f_back = executor.submit(get_opencode_response, prompt, mcp_context)
+                    f_lead = executor.submit(get_antigravity_response, prompt, full_context)
+                    f_front = executor.submit(get_hermes_response, prompt, full_context)
+                    f_back = executor.submit(get_opencode_response, prompt, full_context)
 
-                    result = {
-                        "antigravity": f_lead.result(),
-                        "hermes": f_front.result(),
-                        "opencode": f_back.result()
-                    }
+                    lead_text = f_lead.result()
+                    front_text = f_front.result()
+                    back_text = f_back.result()
 
+                # D. Rekam percakapan ini ke Persistent Memory!
+                tool_used = mcp_meta.get("tool") if mcp_meta.get("executed") else None
+                record_turn(prompt, lead_text, front_text, back_text, tool_used)
+
+                mem_after = load_memory()
                 response_payload = {
                     "status": "ok",
-                    "data": result,
-                    "mcp": mcp_meta
+                    "data": {
+                        "antigravity": lead_text,
+                        "hermes": front_text,
+                        "opencode": back_text
+                    },
+                    "mcp": mcp_meta,
+                    "memory": {
+                        "active": True,
+                        "total_rounds": len(mem_after.get("conversations", [])),
+                        "projects_count": len(mem_after.get("projects", [])),
+                        "decisions_count": len(mem_after.get("decisions", []))
+                    }
                 }
 
                 self.send_response(200)
@@ -296,11 +471,12 @@ if __name__ == "__main__":
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), OfficeRequestHandler) as httpd:
         print(f"=======================================================")
-        print(f"Levantry 3D Virtual Office MCP Native Server")
+        print(f"Levantry 3D Virtual Office LTM & MCP Native Server")
         print(f"Running at: http://localhost:{PORT}")
-        print(f"MCP Tools Active:")
-        print(f"  [1] Web Search (Google News + Wikipedia)")
-        print(f"  [2] GitHub CLI (User: ERGUS457)")
-        print(f"  [3] Google Workspace CLI (User: ergus87@gmail.com)")
+        print(f"Features Active:")
+        print(f"  [🧠] Persistent Long-Term Memory (memory.json)")
+        print(f"  [🌐] Web Search MCP (Live Google News + Wikipedia)")
+        print(f"  [🐙] GitHub MCP (User: ERGUS457)")
+        print(f"  [📁] Google Workspace MCP (User: ergus87@gmail.com)")
         print(f"=======================================================")
         httpd.serve_forever()
