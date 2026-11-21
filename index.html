@@ -60,7 +60,6 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
-    /* 3D Speech Bubbles on mobile */
     .speech-bubble {
       position: absolute;
       transform: translate(-50%, -100%);
@@ -73,7 +72,7 @@
       pointer-events: none;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       z-index: 20;
-      max-width: 170px;
+      max-width: 180px;
       transition: opacity 0.2s ease;
     }
     .speech-bubble::after {
@@ -99,9 +98,15 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(1.3); }
     }
-    /* Smooth mobile drawer transition */
-    .drawer-transition {
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+    .thinking-shimmer {
+      background: linear-gradient(90deg, #f59e0b, #ec4899, #38bdf8, #f59e0b);
+      background-size: 200% auto;
+      animation: shimmer 2s linear infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    @keyframes shimmer {
+      to { background-position: 200% center; }
     }
   </style>
 </head>
@@ -113,10 +118,10 @@
   <!-- HUD Overlay -->
   <div class="hud-overlay">
 
-    <!-- TOP HEADER: Compact & Mobile-First -->
+    <!-- TOP HEADER -->
     <div class="flex items-center justify-between w-full max-w-lg mx-auto interactive gap-2">
       
-      <!-- Brand & Status Pill -->
+      <!-- Brand & Mode Pill -->
       <div class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-2">
         <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-slate-950 text-xs shadow-md shadow-amber-500/20">
           L
@@ -124,32 +129,32 @@
         <div class="flex flex-col">
           <div class="flex items-center gap-1.5">
             <span class="font-bold text-xs text-white leading-none">Levantry 3D</span>
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+            <span id="ai-mode-badge" class="px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-slate-800 text-slate-400 border border-slate-700">SIMULASI</span>
           </div>
-          <span class="text-[9px] text-slate-400 font-mono leading-none mt-0.5">3 AI Agents Active</span>
+          <span id="ai-status-text" class="text-[9px] text-slate-400 font-mono leading-none mt-0.5">3 Agen Siaga</span>
         </div>
       </div>
 
       <!-- Quick Controls -->
       <div class="glass-pill p-1 rounded-full flex items-center gap-1">
-        <button onclick="focusTarget('all')" class="p-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800 transition" title="Reset View">
+        <button onclick="focusTarget('all')" class="p-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800 transition" title="Reset Kamera">
           <i data-lucide="scan" class="w-4 h-4"></i>
         </button>
-        <button onclick="toggleDayNight()" id="btn-theme" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Lighting">
+        <button onclick="toggleDayNight()" id="btn-theme" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Cahaya">
           <i data-lucide="sun" class="w-4 h-4"></i>
         </button>
-        <button onclick="toggleSound()" id="btn-sound" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Sound">
+        <button onclick="toggleSound()" id="btn-sound" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Suara">
           <i data-lucide="volume-2" class="w-4 h-4"></i>
         </button>
-        <button onclick="openConfigModal()" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Settings">
-          <i data-lucide="settings" class="w-4 h-4"></i>
+        <button onclick="openConfigModal()" class="p-1.5 rounded-full text-amber-400 hover:text-amber-300 hover:bg-slate-800 transition relative" title="Aktifkan AI Real LLM">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+          <span id="key-dot" class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400"></span>
         </button>
       </div>
     </div>
 
-    <!-- FLOATING AGENT SELECTOR BUTTONS (Right Side on Screen) -->
+    <!-- FLOATING AGENT SELECTOR BUTTONS (Right Side) -->
     <div class="flex flex-col gap-2 self-end interactive mr-1">
-      <!-- Antigravity -->
       <button onclick="focusTarget('antigravity')" class="glass-pill p-2 rounded-2xl flex items-center gap-2 hover:border-amber-400/60 active:scale-95 transition shadow-lg group">
         <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20">
           <i data-lucide="crown" class="w-4 h-4 text-slate-950"></i>
@@ -160,7 +165,6 @@
         </div>
       </button>
 
-      <!-- Hermes -->
       <button onclick="focusTarget('hermes')" class="glass-pill p-2 rounded-2xl flex items-center gap-2 hover:border-emerald-400/60 active:scale-95 transition shadow-lg group">
         <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-emerald-500/20">
           <i data-lucide="palette" class="w-4 h-4 text-slate-950"></i>
@@ -171,7 +175,6 @@
         </div>
       </button>
 
-      <!-- OpenCode -->
       <button onclick="focusTarget('opencode')" class="glass-pill p-2 rounded-2xl flex items-center gap-2 hover:border-rose-400/60 active:scale-95 transition shadow-lg group">
         <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-orange-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-rose-500/20">
           <i data-lucide="terminal" class="w-4 h-4 text-slate-950"></i>
@@ -183,18 +186,18 @@
       </button>
     </div>
 
-    <!-- BOTTOM FLOATING CONTROLLER (Ultra-Sleek & Clean on Mobile) -->
+    <!-- BOTTOM FLOATING CONTROLLER -->
     <div class="w-full max-w-md mx-auto interactive flex flex-col gap-2 mb-1">
       
       <!-- Speech/Status Toast -->
       <div id="office-banner" class="glass-pill px-3.5 py-1.5 rounded-full flex items-center gap-2 self-center border border-amber-500/30 max-w-[95%]">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-400 pulse-dot shrink-0"></span>
         <p id="banner-text" class="text-[11px] text-slate-200 truncate font-medium">
-          <span class="text-amber-300 font-bold">Antigravity:</span> Siap menerima arahan dari HP.
+          <span class="text-amber-300 font-bold">Antigravity:</span> Ketik instruksi apa saja untuk kami kerjakan.
         </p>
       </div>
 
-      <!-- Quick Action Pills Row (Scrollable horizontally) -->
+      <!-- Quick Action Pills Row -->
       <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[11px]">
         <button onclick="sendPresetTask('standup')" class="px-3 py-1.5 rounded-full glass-pill text-amber-300 hover:text-amber-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500/40">
           <i data-lucide="users" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -222,7 +225,7 @@
         <input 
           id="user-command-input" 
           type="text" 
-          placeholder="Arahkan tim (contoh: 'Bahas promo tenun Sambas')..." 
+          placeholder="Ketik instruksi/tugas ke tim AI..." 
           class="bg-transparent border-0 text-white placeholder-slate-400 text-xs focus:outline-none w-full"
           onkeydown="if(event.key === 'Enter') executeUserCommand()"
         >
@@ -240,28 +243,44 @@
 
   </div>
 
-  <!-- API Key Config Modal -->
-  <div id="config-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="glass-pill p-5 rounded-3xl max-w-sm w-full border border-amber-500/30">
+  <!-- API Key & AI Brain Activation Modal -->
+  <div id="config-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="glass-pill p-5 rounded-3xl max-w-sm w-full border border-amber-500/40 shadow-2xl">
       <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
-          <h3 class="font-bold text-sm text-white">Pengaturan AI Brain</h3>
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">
+            <i data-lucide="brain" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Aktifkan Real AI Thinking</h3>
+            <p class="text-[10px] text-slate-400">Hubungkan ke Google Gemini LLM</p>
+          </div>
         </div>
         <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white p-1">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
+      
       <p class="text-[11px] text-slate-300 mb-3 leading-relaxed">
-        Kantor 3D ini sudah berjalan dengan <b>Autonomous Thinking Engine</b> bawaan. Anda juga bisa memasukkan <b>Google Gemini API Key</b> untuk respons live LLM tak terbatas:
+        Masukkan <b>Gemini API Key</b> gratis Anda agar Antigravity, Hermes, dan OpenCode <b>benar-benar berpikir secara LIVE dari AI</b> setiap kali Anda memberi perintah dari HP!
       </p>
-      <div class="mb-4">
-        <label class="block text-[10px] font-mono text-slate-400 mb-1">Gemini API Key (Opsional):</label>
+
+      <div class="mb-3">
+        <label class="block text-[10px] font-mono text-slate-400 mb-1">Google Gemini API Key:</label>
         <input id="api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+        <a href="https://aistudio.google.com/apikey" target="_blank" class="text-[10px] text-amber-400 hover:underline inline-flex items-center gap-1 mt-1 font-mono">
+          <span>Dapatkan API Key gratis di Google AI Studio</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
       </div>
+
+      <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400 mb-4 leading-normal">
+        🔒 <b>Aman:</b> API Key hanya disimpan di memori HP Anda (LocalStorage), tidak pernah dikirim ke GitHub atau server manapun.
+      </div>
+
       <div class="flex items-center justify-end gap-2">
-        <button onclick="closeConfigModal()" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800 text-slate-300">Tutup</button>
-        <button onclick="saveApiKey()" class="px-3.5 py-1.5 text-xs rounded-xl bg-amber-500 text-slate-950 font-bold">Simpan</button>
+        <button onclick="clearApiKey()" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800 text-rose-400 hover:bg-slate-700">Hapus</button>
+        <button onclick="saveApiKey()" class="px-4 py-1.5 text-xs rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-md shadow-amber-500/20">Aktifkan Real AI</button>
       </div>
     </div>
   </div>
@@ -315,7 +334,7 @@
     }
   </script>
 
-  <!-- Three.js 3D Virtual Office Logic with Mobile FOV Optimization -->
+  <!-- Three.js 3D Virtual Office Logic with Live Real AI Thinking Engine -->
   <script>
     lucide.createIcons();
 
@@ -346,12 +365,10 @@
       scene.background = new THREE.Color(0x0a0f1d);
       scene.fog = new THREE.FogExp2(0x0a0f1d, 0.022);
 
-      // Mobile vs Desktop Camera Setup
       const isMobile = isMobileDevice();
-      const fov = isMobile ? 55 : 45; // Wider FOV for vertical phone screens
+      const fov = isMobile ? 55 : 45;
       camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
       
-      // Position camera further out on mobile so the entire room is visible
       if (isMobile) {
         camera.position.set(16, 18, 20);
       } else {
@@ -375,7 +392,6 @@
       controls.maxDistance = 45;
       controls.target.set(0, 1.2, 0);
 
-      // Touch settings for mobile
       controls.touches = {
         ONE: THREE.TOUCH.ROTATE,
         TWO: THREE.TOUCH.DOLLY_PAN
@@ -388,6 +404,7 @@
       window.addEventListener('resize', onWindowResize, false);
       window.addEventListener('pointerdown', onSceneClick, false);
 
+      updateAiModeBadge();
       startAutonomousRoutines();
       animate();
     }
@@ -899,7 +916,7 @@
         const char = characters[agentKey];
         const p = char.group.position;
         gsapToCamera(p.x + 2.8, p.y + 2.8, p.z + 3.6, p.x, p.y + 1.2, p.z);
-        char.speak(`Halo! Saya ${char.name}, siap eksekusi.`);
+        char.speak(`Halo! Saya ${char.name}, siap beraksi.`);
       }
     }
 
@@ -924,7 +941,59 @@
       step();
     }
 
-    // Command Engine
+    // --- REAL AI THINKING ENGINE VIA GEMINI API ---
+    async function callGeminiAI(systemPrompt, userPrompt) {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      if (!apiKey) return null;
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: `${systemPrompt}\n\nInstruksi User: ${userPrompt}\n\nJawab dalam Bahasa Indonesia yang ringkas, tegas, dan natural (maksimal 1-2 kalimat):` }]
+              }
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 80
+            }
+          })
+        });
+
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+      } catch (e) {
+        console.error("Gemini API call failed:", e);
+        return null;
+      }
+    }
+
+    function updateAiModeBadge() {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      const badge = document.getElementById('ai-mode-badge');
+      const statusText = document.getElementById('ai-status-text');
+      const dot = document.getElementById('key-dot');
+
+      if (apiKey) {
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        badge.innerText = 'REAL AI (GEMINI)';
+        statusText.innerText = 'Live LLM Active';
+        if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400';
+      } else {
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        badge.innerText = 'SIMULASI';
+        statusText.innerText = '3 Agen Siaga';
+        if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400';
+      }
+    }
+
+    // --- PIPELINE BERPIKIR TIGA AGEN ---
     async function executeUserCommand(rawPrompt = null) {
       const inputEl = document.getElementById('user-command-input');
       const prompt = rawPrompt || inputEl.value.trim();
@@ -935,54 +1004,90 @@
       sendBtn.disabled = true;
       sendBtn.innerHTML = `<span>⏳</span>`;
 
-      characters.antigravity.speak(`Instruksi diterima: "${prompt}". Mengatur sprint...`);
+      const hasRealAi = !!localStorage.getItem('gemini_api_key');
+
+      // 1. Antigravity Berpikir & Mendelegasikan
+      characters.antigravity.speak("Sedang memproses & menganalisis instruksi...");
       characters.antigravity.walkTo(new THREE.Vector3(ZONES.whiteboard.x + 1.2, 0, ZONES.whiteboard.z + 0.5));
 
-      const pLow = prompt.toLowerCase();
-      let hermesAction = "Merancang tampilan UI responsif sesuai arahan.";
-      let opencodeAction = "Menyiapkan endpoint API & struktur data backend.";
+      let leadResponse = null;
+      let frontResponse = null;
+      let backResponse = null;
 
-      if (pLow.includes('katalog') || pLow.includes('produk') || pLow.includes('umkm') || pLow.includes('wa') || pLow.includes('tenun')) {
-        hermesAction = "Memperbarui katalog tenun Sambas & tombol checkout WhatsApp!";
-        opencodeAction = "Menyesuaikan query data/products.json dan database produk.";
-      } else if (pLow.includes('cepat') || pLow.includes('server') || pLow.includes('database')) {
-        hermesAction = "Mengompresi aset WebP & mempercepat load mobile.";
-        opencodeAction = "Mengecek response latency server & menambahkan cache.";
-      } else if (pLow.includes('rapat') || pLow.includes('standup')) {
-        sendPresetTask('standup');
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3 h-3"></i>`;
-        lucide.createIcons();
-        return;
+      if (hasRealAi) {
+        leadResponse = await callGeminiAI(
+          "Anda adalah Antigravity, Project Lead / Team Leader AI di Levantry. Anda menerima instruksi dari user. Berikan arahan koordinasi singkat kepada tim (Hermes & OpenCode).",
+          prompt
+        );
       }
 
-      setTimeout(() => {
-        characters.hermes.speak(hermesAction);
+      if (!leadResponse) {
+        const pLow = prompt.toLowerCase();
+        if (pLow.includes('katalog') || pLow.includes('produk') || pLow.includes('tenun')) {
+          leadResponse = `Siap! Mari kita perbarui katalog produk UMKM Sambas dan optimasi konversi penjualan.`;
+        } else if (pLow.includes('cepat') || pLow.includes('server')) {
+          leadResponse = `Baik, prioritas sprint sekarang optimasi kecepatan loading dan efisiensi database.`;
+        } else {
+          leadResponse = `Instruksi diterima: "${prompt}". Saya koordinasikan pembagian tugas ke Hermes dan OpenCode.`;
+        }
+      }
+
+      characters.antigravity.speak(leadResponse);
+
+      // 2. Hermes (Frontend) Berpikir & Eksekusi
+      setTimeout(async () => {
+        characters.hermes.speak("Merancang solusi tampilan...");
+        if (hasRealAi) {
+          frontResponse = await callGeminiAI(
+            "Anda adalah Hermes, Frontend Specialist AI di Levantry. Jelaskan solusi UI/UX atau styling apa yang akan Anda buat untuk tugas ini.",
+            prompt
+          );
+        }
+
+        if (!frontResponse) {
+          frontResponse = "Tampilan UI responsif sedang saya susun dengan Tailwind CSS agar cepat dan menarik di HP!";
+        }
+
+        characters.hermes.speak(frontResponse);
         characters.hermes.walkTo(new THREE.Vector3(ZONES.frontendDesk.x, 0, ZONES.frontendDesk.z + 0.8), () => {
           characters.hermes.isSitting = true;
         });
-      }, 2500);
+      }, 3000);
 
-      setTimeout(() => {
-        characters.opencode.speak(opencodeAction);
-        characters.opencode.walkTo(new THREE.Vector3(ZONES.serverRack.x - 1.2, 0, ZONES.serverRack.z), () => {
-          setTimeout(() => {
-            characters.opencode.walkTo(new THREE.Vector3(ZONES.backendDesk.x, 0, ZONES.backendDesk.z + 0.8), () => {
-              characters.opencode.isSitting = true;
-            });
-          }, 3000);
-        });
-      }, 5000);
+      // 3. OpenCode (Backend) Berpikir & Eksekusi
+      setTimeout(async () => {
+        characters.opencode.speak("Mengecek sistem backend & database...");
+        characters.opencode.walkTo(new THREE.Vector3(ZONES.serverRack.x - 1.2, 0, ZONES.serverRack.z));
 
+        if (hasRealAi) {
+          backResponse = await callGeminiAI(
+            "Anda adalah OpenCode, Backend Engineer AI di Levantry. Jelaskan solusi teknis API, database, atau arsitektur server untuk tugas ini.",
+            prompt
+          );
+        }
+
+        if (!backResponse) {
+          backResponse = "Endpoint API dan database produk sudah dioptimasi, waktu respons stabil di bawah 15ms!";
+        }
+
+        characters.opencode.speak(backResponse);
+        setTimeout(() => {
+          characters.opencode.walkTo(new THREE.Vector3(ZONES.backendDesk.x, 0, ZONES.backendDesk.z + 0.8), () => {
+            characters.opencode.isSitting = true;
+          });
+        }, 3500);
+      }, 6500);
+
+      // 4. Wrap-up
       setTimeout(() => {
-        characters.antigravity.speak("Eksekusi selesai dengan sukses! Tim siap lagi.");
+        characters.antigravity.speak("Eksekusi tugas selesai! Semua sistem terintegrasi dengan baik.");
         characters.antigravity.walkTo(new THREE.Vector3(ZONES.leadDesk.x, 0, ZONES.leadDesk.z + 0.8), () => {
           characters.antigravity.isSitting = true;
         });
         sendBtn.disabled = false;
         sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3 h-3"></i>`;
         lucide.createIcons();
-      }, 9500);
+      }, 11000);
     }
 
     function sendPresetTask(type) {
@@ -1041,6 +1146,8 @@
     function openConfigModal() {
       document.getElementById('config-modal').classList.remove('hidden');
       document.getElementById('config-modal').classList.add('flex');
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) document.getElementById('api-key-input').value = savedKey;
     }
 
     function closeConfigModal() {
@@ -1053,7 +1160,17 @@
       if (key) {
         localStorage.setItem('gemini_api_key', key);
       }
+      updateAiModeBadge();
       closeConfigModal();
+      characters.antigravity.speak("Real AI Thinking Berhasil Diaktifkan! Kami sekarang terhubung langsung ke Google Gemini.");
+    }
+
+    function clearApiKey() {
+      localStorage.removeItem('gemini_api_key');
+      document.getElementById('api-key-input').value = '';
+      updateAiModeBadge();
+      closeConfigModal();
+      characters.antigravity.speak("Mode simulasi aktif kembali.");
     }
 
     const raycaster = new THREE.Raycaster();
