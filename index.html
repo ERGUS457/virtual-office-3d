@@ -2,16 +2,19 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Levantry 3D Virtual Office - AI Multi-Agent HQ</title>
-  <!-- Google Fonts & Tailwind CDN -->
+  
+  <!-- Fonts & Tailwind CDN -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  
   <!-- Three.js and OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -20,88 +23,85 @@
       -webkit-tap-highlight-color: transparent;
       box-sizing: border-box;
     }
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+    html, body {
+      width: 100%;
+      height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #080d1a;
       user-select: none;
-      background-color: #0b0f19;
-      touch-action: none;
     }
     #canvas-container {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 1;
     }
     .hud-overlay {
       position: absolute;
+      inset: 0;
       pointer-events: none;
       z-index: 10;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: env(safe-area-inset-top, 12px) 12px env(safe-area-inset-bottom, 12px) 12px;
     }
     .interactive {
       pointer-events: auto;
     }
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+    .glass-pill {
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
+    /* 3D Speech Bubbles on mobile */
     .speech-bubble {
       position: absolute;
       transform: translate(-50%, -100%);
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(255, 215, 0, 0.4);
-      border-radius: 12px;
-      padding: 8px 14px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 1px solid rgba(255, 215, 0, 0.5);
+      border-radius: 10px;
+      padding: 6px 10px;
       color: #f8fafc;
       font-size: 11px;
-      font-weight: 500;
       pointer-events: none;
-      white-space: nowrap;
-      transition: opacity 0.25s ease;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       z-index: 20;
-      max-width: 240px;
-      white-space: normal;
+      max-width: 170px;
+      transition: opacity 0.2s ease;
     }
     .speech-bubble::after {
       content: '';
       position: absolute;
-      bottom: -6px;
+      bottom: -5px;
       left: 50%;
       transform: translateX(-50%);
-      border-width: 6px 6px 0;
+      border-width: 5px 5px 0;
       border-style: solid;
-      border-color: rgba(15, 23, 42, 0.95) transparent;
+      border-color: rgba(15, 23, 42, 0.94) transparent;
       display: block;
       width: 0;
     }
-    .bubble-antigravity { border-color: rgba(245, 158, 11, 0.6); }
-    .bubble-hermes { border-color: rgba(16, 185, 129, 0.6); }
-    .bubble-opencode { border-color: rgba(244, 63, 94, 0.6); }
+    .bubble-antigravity { border-color: rgba(245, 158, 11, 0.8); }
+    .bubble-hermes { border-color: rgba(16, 185, 129, 0.8); }
+    .bubble-opencode { border-color: rgba(244, 63, 94, 0.8); }
+
     .pulse-dot {
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
+      50% { opacity: 0.4; transform: scale(1.3); }
     }
-    /* Scrollbar styling for feed */
-    .custom-scroll::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 4px;
+    /* Smooth mobile drawer transition */
+    .drawer-transition {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
     }
   </style>
 </head>
@@ -111,120 +111,129 @@
   <div id="canvas-container"></div>
 
   <!-- HUD Overlay -->
-  <div class="hud-overlay flex flex-col justify-between p-3 md:p-6">
-    
-    <!-- TOP BAR -->
-    <header class="flex items-center justify-between gap-2 interactive w-full">
-      <!-- Title & Branding -->
-      <div class="flex items-center space-x-3 glass-panel px-3.5 py-2 md:px-5 md:py-3 rounded-2xl shrink-0">
-        <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-300 to-yellow-600 flex items-center justify-center shadow-lg shadow-amber-500/20 text-slate-950 font-black text-lg md:text-xl">
+  <div class="hud-overlay">
+
+    <!-- TOP HEADER: Compact & Mobile-First -->
+    <div class="flex items-center justify-between w-full max-w-lg mx-auto interactive gap-2">
+      
+      <!-- Brand & Status Pill -->
+      <div class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-2">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center font-black text-slate-950 text-xs shadow-md shadow-amber-500/20">
           L
         </div>
-        <div>
-          <div class="flex items-center space-x-2">
-            <h1 class="font-bold text-sm md:text-base text-white tracking-wide">Levantry 3D HQ</h1>
-            <span class="px-1.5 py-0.2 text-[9px] md:text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span> LIVE
-            </span>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-xs text-white leading-none">Levantry 3D</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
           </div>
-          <p class="text-[10px] md:text-xs text-slate-400 font-mono hidden sm:block">
-            <span>Sprint: Website UMKM Sambas</span> &bull; <span class="text-amber-400">3 AI Agents</span>
-          </p>
+          <span class="text-[9px] text-slate-400 font-mono leading-none mt-0.5">3 AI Agents Active</span>
         </div>
       </div>
 
-      <!-- Quick Action Controls -->
-      <div class="flex items-center space-x-1.5 md:space-x-2 glass-panel p-1.5 rounded-2xl">
-        <button onclick="focusTarget('all')" class="px-2.5 py-1.5 md:px-3.5 md:py-2 text-[11px] md:text-xs font-semibold rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
-          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
-          <span class="hidden md:inline">Ruang</span>
+      <!-- Quick Controls -->
+      <div class="glass-pill p-1 rounded-full flex items-center gap-1">
+        <button onclick="focusTarget('all')" class="p-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800 transition" title="Reset View">
+          <i data-lucide="scan" class="w-4 h-4"></i>
         </button>
-        <button onclick="focusTarget('antigravity')" class="px-2 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold rounded-xl text-slate-300 hover:text-amber-400 hover:bg-slate-800 transition flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_#f59e0b]"></span>
-          <span class="hidden sm:inline">Lead</span>
-        </button>
-        <button onclick="focusTarget('hermes')" class="px-2 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold rounded-xl text-slate-300 hover:text-emerald-400 hover:bg-slate-800 transition flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981]"></span>
-          <span class="hidden sm:inline">Front</span>
-        </button>
-        <button onclick="focusTarget('opencode')" class="px-2 py-1.5 md:px-3 md:py-2 text-[11px] md:text-xs font-semibold rounded-xl text-slate-300 hover:text-rose-400 hover:bg-slate-800 transition flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_6px_#f43f5e]"></span>
-          <span class="hidden sm:inline">Back</span>
-        </button>
-        <div class="w-px h-5 bg-slate-700 mx-0.5"></div>
-        <button onclick="toggleDayNight()" id="btn-theme" class="p-1.5 md:p-2 text-slate-300 hover:text-amber-300 rounded-xl hover:bg-slate-800 transition" title="Toggle Cahaya">
+        <button onclick="toggleDayNight()" id="btn-theme" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Lighting">
           <i data-lucide="sun" class="w-4 h-4"></i>
         </button>
-        <button onclick="toggleSound()" id="btn-sound" class="p-1.5 md:p-2 text-slate-300 hover:text-amber-300 rounded-xl hover:bg-slate-800 transition" title="Toggle Suara">
+        <button onclick="toggleSound()" id="btn-sound" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Sound">
           <i data-lucide="volume-2" class="w-4 h-4"></i>
         </button>
-        <button onclick="openConfigModal()" class="p-1.5 md:p-2 text-slate-300 hover:text-amber-300 rounded-xl hover:bg-slate-800 transition" title="Setting AI API">
+        <button onclick="openConfigModal()" class="p-1.5 rounded-full text-slate-300 hover:text-amber-300 hover:bg-slate-800 transition" title="Settings">
           <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
       </div>
-    </header>
-
-    <!-- CENTER NOTIFICATION BANNER -->
-    <div id="office-banner" class="self-center glass-panel px-4 py-2 md:px-6 md:py-2.5 rounded-full flex items-center gap-2.5 border border-amber-500/30 shadow-2xl transition-all duration-300 max-w-[92vw] text-center my-2">
-      <div class="w-2 h-2 rounded-full bg-amber-400 pulse-dot shrink-0"></div>
-      <p id="banner-text" class="text-[11px] md:text-xs font-medium text-slate-200 truncate">
-        <span class="text-amber-300 font-semibold">Antigravity:</span> "Selamat datang! Ketik perintah di bawah untuk mengarahkan tim AI."
-      </p>
     </div>
 
-    <!-- BOTTOM COMMAND CENTER & MOBILE CONTROLLER -->
-    <div class="flex flex-col gap-2.5 w-full max-w-4xl mx-auto interactive">
+    <!-- FLOATING AGENT SELECTOR BUTTONS (Right Side on Screen) -->
+    <div class="flex flex-col gap-2 self-end interactive mr-1">
+      <!-- Antigravity -->
+      <button onclick="focusTarget('antigravity')" class="glass-pill p-2 rounded-2xl flex items-center gap-2 hover:border-amber-400/60 active:scale-95 transition shadow-lg group">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-amber-500/20">
+          <i data-lucide="crown" class="w-4 h-4 text-slate-950"></i>
+        </div>
+        <div class="text-left hidden sm:block pr-2">
+          <div class="text-[11px] font-bold text-white">Antigravity</div>
+          <div class="text-[9px] text-amber-300">Lead AI</div>
+        </div>
+      </button>
+
+      <!-- Hermes -->
+      <button onclick="focusTarget('hermes')" class="glass-pill p-2 rounded-2xl flex items-center gap-2 hover:border-emerald-400/60 active:scale-95 transition shadow-lg group">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-emerald-500/20">
+          <i data-lucide="palette" class="w-4 h-4 text-slate-950"></i>
+        </div>
+        <div class="text-left hidden sm:block pr-2">
+          <div class="text-[11px] font-bold text-white">Hermes</div>
+          <div class="text-[9px] text-emerald-300">Frontend AI</div>
+        </div>
+      </button>
+
+      <!-- OpenCode -->
+      <button onclick="focusTarget('opencode')" class="glass-pill p-2 rounded-2xl flex items-center gap-2 hover:border-rose-400/60 active:scale-95 transition shadow-lg group">
+        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-rose-500 to-orange-400 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-rose-500/20">
+          <i data-lucide="terminal" class="w-4 h-4 text-slate-950"></i>
+        </div>
+        <div class="text-left hidden sm:block pr-2">
+          <div class="text-[11px] font-bold text-white">OpenCode</div>
+          <div class="text-[9px] text-rose-300">Backend AI</div>
+        </div>
+      </button>
+    </div>
+
+    <!-- BOTTOM FLOATING CONTROLLER (Ultra-Sleek & Clean on Mobile) -->
+    <div class="w-full max-w-md mx-auto interactive flex flex-col gap-2 mb-1">
       
-      <!-- Quick Instruction Chips -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scroll text-[11px] no-scrollbar">
-        <span class="text-slate-400 text-[10px] font-bold px-2 py-1 uppercase tracking-wider shrink-0">Aksi Cepat:</span>
-        <button onclick="sendPresetTask('standup')" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 shrink-0 flex items-center gap-1 transition">
-          <i data-lucide="users" class="w-3 h-3"></i> Standup Rapat
+      <!-- Speech/Status Toast -->
+      <div id="office-banner" class="glass-pill px-3.5 py-1.5 rounded-full flex items-center gap-2 self-center border border-amber-500/30 max-w-[95%]">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 pulse-dot shrink-0"></span>
+        <p id="banner-text" class="text-[11px] text-slate-200 truncate font-medium">
+          <span class="text-amber-300 font-bold">Antigravity:</span> Siap menerima arahan dari HP.
+        </p>
+      </div>
+
+      <!-- Quick Action Pills Row (Scrollable horizontally) -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-[11px]">
+        <button onclick="sendPresetTask('standup')" class="px-3 py-1.5 rounded-full glass-pill text-amber-300 hover:text-amber-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-amber-500/40">
+          <i data-lucide="users" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Rapat Standup</span>
         </button>
-        <button onclick="sendPresetTask('katalog')" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 shrink-0 flex items-center gap-1 transition">
-          <i data-lucide="shopping-bag" class="w-3 h-3"></i> Tambah Fitur UMKM
+        <button onclick="sendPresetTask('katalog')" class="px-3 py-1.5 rounded-full glass-pill text-emerald-300 hover:text-emerald-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-emerald-500/40">
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Katalog UMKM</span>
         </button>
-        <button onclick="sendPresetTask('optimasi')" class="px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 shrink-0 flex items-center gap-1 transition">
-          <i data-lucide="zap" class="w-3 h-3"></i> Cek Kecepatan & API
+        <button onclick="sendPresetTask('optimasi')" class="px-3 py-1.5 rounded-full glass-pill text-sky-300 hover:text-sky-200 active:scale-95 flex items-center gap-1.5 shrink-0 border border-sky-500/40">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>Cek Server</span>
         </button>
-        <button onclick="sendPresetTask('kopi')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 shrink-0 flex items-center gap-1 transition">
-          <i data-lucide="coffee" class="w-3 h-3"></i> Coffee Break
-        </button>
-        <button onclick="sendPresetTask('laporan')" class="px-2.5 py-1 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 shrink-0 flex items-center gap-1 transition">
-          <i data-lucide="file-text" class="w-3 h-3"></i> Laporan Sprint
+        <button onclick="sendPresetTask('kopi')" class="px-3 py-1.5 rounded-full glass-pill text-slate-300 hover:text-white active:scale-95 flex items-center gap-1.5 shrink-0 border border-slate-700">
+          <i data-lucide="coffee" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Kopi Break</span>
         </button>
       </div>
 
-      <!-- Live Command Input Box -->
-      <div class="glass-panel p-2 md:p-2.5 rounded-2xl flex items-center gap-2 border border-slate-700/80 shadow-2xl">
-        <div class="w-8 h-8 rounded-xl bg-slate-800/80 flex items-center justify-center shrink-0 text-amber-400">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
+      <!-- Command Input Bar -->
+      <div class="glass-pill p-1.5 rounded-2xl flex items-center gap-2 border border-slate-700 shadow-2xl">
+        <div class="w-7 h-7 rounded-xl bg-slate-800/90 flex items-center justify-center shrink-0 text-amber-400 ml-0.5">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
         </div>
         <input 
           id="user-command-input" 
           type="text" 
-          placeholder="Ketik instruksi/tugas ke tim (contoh: 'Buat promo diskon produk tenun Sambas')..." 
-          class="bg-transparent border-0 text-white placeholder-slate-400 text-xs md:text-sm focus:outline-none w-full"
+          placeholder="Arahkan tim (contoh: 'Bahas promo tenun Sambas')..." 
+          class="bg-transparent border-0 text-white placeholder-slate-400 text-xs focus:outline-none w-full"
           onkeydown="if(event.key === 'Enter') executeUserCommand()"
         >
         <button 
           id="btn-send-command"
           onclick="executeUserCommand()" 
-          class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20 shrink-0 transition"
+          class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 active:scale-95 text-slate-950 font-bold text-xs flex items-center gap-1 shrink-0 shadow-md shadow-amber-500/20"
         >
           <span>Kirim</span>
-          <i data-lucide="send" class="w-3.5 h-3.5"></i>
+          <i data-lucide="send" class="w-3 h-3"></i>
         </button>
-      </div>
-
-      <!-- Real-time Agent Log Drawer (Collapsible) -->
-      <div id="log-drawer" class="glass-panel p-2.5 rounded-2xl text-[11px] font-mono border border-slate-800 flex items-center justify-between text-slate-300">
-        <div class="flex items-center gap-2 truncate">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          <span class="text-slate-400">Aktivitas Terakhir:</span>
-          <span id="log-text" class="text-white truncate">Semua agen siaga di workstation masing-masing.</span>
-        </div>
-        <span class="text-[9px] px-2 py-0.5 rounded bg-slate-800/80 text-amber-400 font-bold border border-slate-700 shrink-0">ONLINE</span>
       </div>
 
     </div>
@@ -233,34 +242,34 @@
 
   <!-- API Key Config Modal -->
   <div id="config-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-    <div class="glass-panel p-6 rounded-2xl max-w-md w-full border border-amber-500/30">
-      <div class="flex items-center justify-between mb-4">
+    <div class="glass-pill p-5 rounded-3xl max-w-sm w-full border border-amber-500/30">
+      <div class="flex items-center justify-between mb-3">
         <div class="flex items-center gap-2">
-          <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
-          <h3 class="font-bold text-base text-white">Konfigurasi AI Brain</h3>
+          <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
+          <h3 class="font-bold text-sm text-white">Pengaturan AI Brain</h3>
         </div>
-        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
-      <p class="text-xs text-slate-300 mb-4 leading-relaxed">
-        Kantor virtual ini sudah dilengkapi dengan <b>Autonomous Thinking Engine</b> bawaan. Jika Anda ingin menghubungkan langsung ke <b>Google Gemini API</b> agar mereka berpikir live dari LLM, masukkan API key Anda di bawah:
+      <p class="text-[11px] text-slate-300 mb-3 leading-relaxed">
+        Kantor 3D ini sudah berjalan dengan <b>Autonomous Thinking Engine</b> bawaan. Anda juga bisa memasukkan <b>Google Gemini API Key</b> untuk respons live LLM tak terbatas:
       </p>
       <div class="mb-4">
-        <label class="block text-[11px] font-mono text-slate-400 mb-1">Gemini API Key (Opsional):</label>
+        <label class="block text-[10px] font-mono text-slate-400 mb-1">Gemini API Key (Opsional):</label>
         <input id="api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
       </div>
       <div class="flex items-center justify-end gap-2">
-        <button onclick="closeConfigModal()" class="px-4 py-2 text-xs rounded-xl bg-slate-800 text-slate-300 hover:text-white">Batal</button>
-        <button onclick="saveApiKey()" class="px-4 py-2 text-xs rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Simpan & Aktifkan</button>
+        <button onclick="closeConfigModal()" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800 text-slate-300">Tutup</button>
+        <button onclick="saveApiKey()" class="px-3.5 py-1.5 text-xs rounded-xl bg-amber-500 text-slate-950 font-bold">Simpan</button>
       </div>
     </div>
   </div>
 
-  <!-- Speech bubbles container in 3D -->
+  <!-- 3D Speech Bubbles Container -->
   <div id="speech-bubbles-container"></div>
 
-  <!-- Web Audio Synthesizer for Procedural Chimes & Clicks -->
+  <!-- Web Audio Synthesizer -->
   <script>
     let audioCtx = null;
     let soundEnabled = true;
@@ -284,19 +293,12 @@
       const now = audioCtx.currentTime;
       if (type === 'chime') {
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(587.33, now); // D5
-        osc.frequency.exponentialRampToValueAtTime(880, now + 0.15); // A5
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.frequency.setValueAtTime(587.33, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
         osc.start(now);
-        osc.stop(now + 0.35);
-      } else if (type === 'step') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(120, now);
-        gain.gain.setValueAtTime(0.02, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-        osc.start(now);
-        osc.stop(now + 0.08);
+        osc.stop(now + 0.28);
       }
     }
 
@@ -313,7 +315,7 @@
     }
   </script>
 
-  <!-- Main Three.js Scene & Agent Controller -->
+  <!-- Three.js 3D Virtual Office Logic with Mobile FOV Optimization -->
   <script>
     lucide.createIcons();
 
@@ -333,15 +335,28 @@
       serverRack: new THREE.Vector3(5.5, 0, -1)
     };
 
+    function isMobileDevice() {
+      return window.innerWidth < 768;
+    }
+
     function init() {
       const container = document.getElementById('canvas-container');
 
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x0a0f1d);
-      scene.fog = new THREE.FogExp2(0x0a0f1d, 0.025);
+      scene.fog = new THREE.FogExp2(0x0a0f1d, 0.022);
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(13, 14, 17);
+      // Mobile vs Desktop Camera Setup
+      const isMobile = isMobileDevice();
+      const fov = isMobile ? 55 : 45; // Wider FOV for vertical phone screens
+      camera = new THREE.PerspectiveCamera(fov, window.innerWidth / window.innerHeight, 0.1, 1000);
+      
+      // Position camera further out on mobile so the entire room is visible
+      if (isMobile) {
+        camera.position.set(16, 18, 20);
+      } else {
+        camera.position.set(13, 14, 17);
+      }
 
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -349,16 +364,22 @@
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.1;
+      renderer.toneMappingExposure = 1.15;
       container.appendChild(renderer.domElement);
 
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.maxPolarAngle = Math.PI / 2.1;
+      controls.dampingFactor = 0.06;
+      controls.maxPolarAngle = Math.PI / 2.15;
       controls.minDistance = 4;
-      controls.maxDistance = 40;
-      controls.target.set(0, 1.5, 0);
+      controls.maxDistance = 45;
+      controls.target.set(0, 1.2, 0);
+
+      // Touch settings for mobile
+      controls.touches = {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+      };
 
       setupLighting();
       buildOfficeRoom();
@@ -372,14 +393,14 @@
     }
 
     function setupLighting() {
-      ambientLight = new THREE.AmbientLight(0x8ea8d6, 0.55);
+      ambientLight = new THREE.AmbientLight(0x8ea8d6, 0.6);
       scene.add(ambientLight);
 
-      dirLight = new THREE.DirectionalLight(0xfff1dc, 1.3);
+      dirLight = new THREE.DirectionalLight(0xfff1dc, 1.35);
       dirLight.position.set(12, 18, 10);
       dirLight.castShadow = true;
-      dirLight.shadow.mapSize.width = 2048;
-      dirLight.shadow.mapSize.height = 2048;
+      dirLight.shadow.mapSize.width = isMobileDevice() ? 1024 : 2048;
+      dirLight.shadow.mapSize.height = isMobileDevice() ? 1024 : 2048;
       dirLight.shadow.camera.near = 0.5;
       dirLight.shadow.camera.far = 50;
       const d = 14;
@@ -410,15 +431,15 @@
         scene.background.setHex(0xe2e8f0);
         scene.fog.color.setHex(0xe2e8f0);
         ambientLight.color.setHex(0xffffff);
-        ambientLight.intensity = 0.85;
+        ambientLight.intensity = 0.9;
         dirLight.intensity = 1.6;
         btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4"></i>`;
       } else {
         scene.background.setHex(0x0a0f1d);
         scene.fog.color.setHex(0x0a0f1d);
         ambientLight.color.setHex(0x8ea8d6);
-        ambientLight.intensity = 0.55;
-        dirLight.intensity = 1.2;
+        ambientLight.intensity = 0.6;
+        dirLight.intensity = 1.25;
         btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4"></i>`;
       }
       lucide.createIcons();
@@ -435,8 +456,7 @@
       const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 });
 
       // Floor
-      const floorGeo = new THREE.BoxGeometry(16, 0.4, 14);
-      const floor = new THREE.Mesh(floorGeo, floorMat);
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(16, 0.4, 14), floorMat);
       floor.position.set(0, -0.2, 0);
       floor.receiveShadow = true;
       roomGroup.add(floor);
@@ -446,8 +466,7 @@
       roomGroup.add(gridHelper);
 
       // Back Wall with Skyline Window
-      const backWallGeo = new THREE.BoxGeometry(16, 6, 0.4);
-      const backWall = new THREE.Mesh(backWallGeo, wallMat);
+      const backWall = new THREE.Mesh(new THREE.BoxGeometry(16, 6, 0.4), wallMat);
       backWall.position.set(0, 3, -7);
       backWall.receiveShadow = true;
       roomGroup.add(backWall);
@@ -474,7 +493,6 @@
       leftWall.receiveShadow = true;
       roomGroup.add(leftWall);
 
-      // Signboard
       const sign = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.2, 5), new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5 }));
       sign.position.set(-7.75, 4.2, 0);
       roomGroup.add(sign);
@@ -483,7 +501,7 @@
       neon.position.set(-7.7, 3.6, 0);
       roomGroup.add(neon);
 
-      // Dev Workstation Builder
+      // Desks Builder
       function createDevWorkstation(x, z, label, accentColor, monitorCount = 2) {
         const deskGroup = new THREE.Group();
         deskGroup.position.set(x, 0, z);
@@ -531,10 +549,6 @@
         const kb = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.02, 0.18), whiteMat);
         kb.position.set(0, 1.41, 0.05);
         deskGroup.add(kb);
-
-        const mouse = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.02, 0.1), darkDeskMat);
-        mouse.position.set(0.35, 1.41, 0.05);
-        deskGroup.add(mouse);
 
         const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.1, 16), new THREE.MeshStandardMaterial({ color: accentColor }));
         mug.position.set(-0.6, 1.45, 0.1);
@@ -630,7 +644,7 @@
       }
       roomGroup.add(serverGroup);
 
-      // Coffee Bar
+      // Coffee Lounge
       const coffeeGroup = new THREE.Group();
       coffeeGroup.position.copy(ZONES.coffeeBar);
       const counter = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.3, 1.8), darkDeskMat);
@@ -655,7 +669,7 @@
 
     // 3D Procedural Character Class
     class OfficeCharacter {
-      constructor(id, name, role, colorTheme, homePos, badgeStyle, bubbleStyle) {
+      constructor(id, name, role, colorTheme, homePos, bubbleStyle) {
         this.id = id;
         this.name = name;
         this.role = role;
@@ -665,7 +679,6 @@
         this.isWalking = false;
         this.isSitting = true;
         this.walkSpeed = 2.4;
-        this.badgeStyle = badgeStyle;
         this.bubbleStyle = bubbleStyle;
 
         this.group = new THREE.Group();
@@ -749,11 +762,8 @@
         this.tagEl.className = `speech-bubble ${this.bubbleStyle}`;
         this.tagEl.id = `bubble-${this.id}`;
         this.tagEl.innerHTML = `
-          <div class="flex items-center gap-1.5 mb-0.5">
-            <span class="font-bold text-white text-[11px]">${this.name}</span>
-            <span class="text-[9px] px-1.5 py-0.2 rounded font-semibold ${this.badgeStyle}">${this.role}</span>
-          </div>
-          <div class="text-[11px] text-slate-300 msg-text">Siaga di workstation...</div>
+          <div class="font-bold text-[10px] text-white">${this.name}</div>
+          <div class="text-[10px] text-slate-300 msg-text leading-tight">Siaga...</div>
         `;
         container.appendChild(this.tagEl);
       }
@@ -762,7 +772,7 @@
         if (!this.tagEl) return;
         const wp = new THREE.Vector3();
         this.group.getWorldPosition(wp);
-        wp.y += 2.5;
+        wp.y += 2.4;
 
         wp.project(camera);
         if (wp.z > 1) {
@@ -780,15 +790,11 @@
         if (!this.tagEl) return;
         const msgEl = this.tagEl.querySelector('.msg-text');
         if (msgEl) {
-          msgEl.innerHTML = `<span class="text-amber-300 font-semibold leading-tight">"${message}"</span>`;
+          msgEl.innerHTML = `<span class="text-amber-300 font-semibold leading-tight">${message}</span>`;
         }
         const banner = document.getElementById('banner-text');
         if (banner) {
           banner.innerHTML = `<span class="text-amber-400 font-bold">${this.name}:</span> "${message}"`;
-        }
-        const logText = document.getElementById('log-text');
-        if (logText) {
-          logText.innerText = `${this.name}: ${message}`;
         }
         playSound('chime');
       }
@@ -859,7 +865,6 @@
         'Lead AI',
         { primary: 0x1e3a8a, secondary: 0x0f172a, hair: 0x0284c7, accent: 0xf59e0b },
         new THREE.Vector3(ZONES.leadDesk.x, 0, ZONES.leadDesk.z + 0.8),
-        'bg-amber-500/20 text-amber-300 border border-amber-500/30',
         'bubble-antigravity'
       );
 
@@ -869,7 +874,6 @@
         'Frontend AI',
         { primary: 0x065f46, secondary: 0x0f172a, hair: 0x10b981, accent: 0x34d399 },
         new THREE.Vector3(ZONES.frontendDesk.x, 0, ZONES.frontendDesk.z + 0.8),
-        'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
         'bubble-hermes'
       );
 
@@ -879,19 +883,23 @@
         'Backend AI',
         { primary: 0x9f1239, secondary: 0x0f172a, hair: 0xf43f5e, accent: 0xfb7185 },
         new THREE.Vector3(ZONES.backendDesk.x, 0, ZONES.backendDesk.z + 0.8),
-        'bg-rose-500/20 text-rose-300 border border-rose-500/30',
         'bubble-opencode'
       );
     }
 
     function focusTarget(agentKey) {
       if (agentKey === 'all') {
-        gsapToCamera(13, 14, 17, 0, 1.5, 0);
+        const isMobile = isMobileDevice();
+        if (isMobile) {
+          gsapToCamera(16, 18, 20, 0, 1.2, 0);
+        } else {
+          gsapToCamera(13, 14, 17, 0, 1.5, 0);
+        }
       } else if (characters[agentKey]) {
         const char = characters[agentKey];
         const p = char.group.position;
-        gsapToCamera(p.x + 3.2, p.y + 3.4, p.z + 4.2, p.x, p.y + 1.2, p.z);
-        char.speak(`Halo dari ${char.name}! Saya siap menjalankan instruksi dari HP/web.`);
+        gsapToCamera(p.x + 2.8, p.y + 2.8, p.z + 3.6, p.x, p.y + 1.2, p.z);
+        char.speak(`Halo! Saya ${char.name}, siap eksekusi.`);
       }
     }
 
@@ -916,7 +924,7 @@
       step();
     }
 
-    // --- INTERACTIVE COMMAND ENGINE & REASONING PIPELINE ---
+    // Command Engine
     async function executeUserCommand(rawPrompt = null) {
       const inputEl = document.getElementById('user-command-input');
       const prompt = rawPrompt || inputEl.value.trim();
@@ -925,38 +933,35 @@
       inputEl.value = '';
       const sendBtn = document.getElementById('btn-send-command');
       sendBtn.disabled = true;
-      sendBtn.innerHTML = `<span class="animate-spin">⏳</span>`;
+      sendBtn.innerHTML = `<span>⏳</span>`;
 
-      // 1. Antigravity takes the command & delegates
-      characters.antigravity.speak(`Menerima instruksi: "${prompt}". Mengatur koordinasi sprint...`);
+      characters.antigravity.speak(`Instruksi diterima: "${prompt}". Mengatur sprint...`);
       characters.antigravity.walkTo(new THREE.Vector3(ZONES.whiteboard.x + 1.2, 0, ZONES.whiteboard.z + 0.5));
 
-      // 2. Determine agent action based on prompt keywords
       const pLow = prompt.toLowerCase();
-      let hermesAction = "Merancang komponen UI & styling responsif sesuai arahan.";
-      let opencodeAction = "Menyiapkan endpoint API & struktur data JSON backend.";
+      let hermesAction = "Merancang tampilan UI responsif sesuai arahan.";
+      let opencodeAction = "Menyiapkan endpoint API & struktur data backend.";
 
-      if (pLow.includes('katalog') || pLow.includes('produk') || pLow.includes('umkm') || pLow.includes('beli') || pLow.includes('wa')) {
-        hermesAction = "Memperbarui tampilan katalog tenun Sambas & tombol WhatsApp checkout!";
-        opencodeAction = "Menyesuaikan query data/products.json dan filter kategori produk.";
-      } else if (pLow.includes('cepat') || pLow.includes('kecepatan') || pLow.includes('server') || pLow.includes('database')) {
-        hermesAction = "Mengompresi aset WebP & membersihkan render blocking CSS.";
-        opencodeAction = "Mengecek response latency server & menambahkan in-memory cache.";
+      if (pLow.includes('katalog') || pLow.includes('produk') || pLow.includes('umkm') || pLow.includes('wa') || pLow.includes('tenun')) {
+        hermesAction = "Memperbarui katalog tenun Sambas & tombol checkout WhatsApp!";
+        opencodeAction = "Menyesuaikan query data/products.json dan database produk.";
+      } else if (pLow.includes('cepat') || pLow.includes('server') || pLow.includes('database')) {
+        hermesAction = "Mengompresi aset WebP & mempercepat load mobile.";
+        opencodeAction = "Mengecek response latency server & menambahkan cache.";
       } else if (pLow.includes('rapat') || pLow.includes('standup')) {
         sendPresetTask('standup');
         sendBtn.disabled = false;
-        sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3.5 h-3.5"></i>`;
+        sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3 h-3"></i>`;
         lucide.createIcons();
         return;
       }
 
-      // 3. Sequential thinking chain
       setTimeout(() => {
         characters.hermes.speak(hermesAction);
         characters.hermes.walkTo(new THREE.Vector3(ZONES.frontendDesk.x, 0, ZONES.frontendDesk.z + 0.8), () => {
           characters.hermes.isSitting = true;
         });
-      }, 3000);
+      }, 2500);
 
       setTimeout(() => {
         characters.opencode.speak(opencodeAction);
@@ -965,58 +970,56 @@
             characters.opencode.walkTo(new THREE.Vector3(ZONES.backendDesk.x, 0, ZONES.backendDesk.z + 0.8), () => {
               characters.opencode.isSitting = true;
             });
-          }, 3500);
+          }, 3000);
         });
-      }, 6000);
+      }, 5000);
 
       setTimeout(() => {
-        characters.antigravity.speak("Eksekusi selesai dengan sukses! Tim kembali siaga.");
+        characters.antigravity.speak("Eksekusi selesai dengan sukses! Tim siap lagi.");
         characters.antigravity.walkTo(new THREE.Vector3(ZONES.leadDesk.x, 0, ZONES.leadDesk.z + 0.8), () => {
           characters.antigravity.isSitting = true;
         });
         sendBtn.disabled = false;
-        sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3.5 h-3.5"></i>`;
+        sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3 h-3"></i>`;
         lucide.createIcons();
-      }, 11000);
+      }, 9500);
     }
 
     function sendPresetTask(type) {
       if (type === 'standup') {
         const banner = document.getElementById('banner-text');
-        banner.innerHTML = `<span class="text-amber-400 font-bold">Standup Meeting:</span> Semua agen berkumpul di meja rapat untuk sync sprint!`;
+        banner.innerHTML = `<span class="text-amber-400 font-bold">Standup:</span> Berkumpul di meja rapat untuk sync sprint!`;
 
         characters.antigravity.walkTo(new THREE.Vector3(ZONES.meetingTable.x - 1.2, 0, ZONES.meetingTable.z), () => {
           characters.antigravity.speak("Sync sprint dimulai! Prioritas kita website UMKM Sambas.");
         });
         setTimeout(() => {
           characters.hermes.walkTo(new THREE.Vector3(ZONES.meetingTable.x, 0, ZONES.meetingTable.z + 1.2), () => {
-            characters.hermes.speak("Frontend katalog responsif & tombol WA 0858-2291-2826 sudah sinkron!");
+            characters.hermes.speak("Frontend katalog responsif & tombol WA siap!");
           });
-        }, 600);
+        }, 500);
         setTimeout(() => {
           characters.opencode.walkTo(new THREE.Vector3(ZONES.meetingTable.x + 1.2, 0, ZONES.meetingTable.z), () => {
-            characters.opencode.speak("Endpoint data JSON dan 9Router combo model aman beroperasi.");
+            characters.opencode.speak("API JSON dan model AI stabil beroperasi.");
           });
-        }, 1200);
+        }, 1000);
 
         setTimeout(() => {
           returnToDesks();
-        }, 18000);
+        }, 16000);
       } else if (type === 'katalog') {
-        executeUserCommand("Tambahkan dan poles katalog UMKM Sambas");
+        executeUserCommand("Poles katalog produk UMKM Sambas");
       } else if (type === 'optimasi') {
-        executeUserCommand("Cek performa kecepatan render dan query database");
+        executeUserCommand("Cek performa kecepatan server dan database");
       } else if (type === 'kopi') {
         characters.hermes.walkTo(new THREE.Vector3(ZONES.coffeeBar.x - 0.8, 0, ZONES.coffeeBar.z), () => {
-          characters.hermes.speak("Seduh kopi dulu sebentar biar coding makin fresh! ☕");
+          characters.hermes.speak("Seduh kopi dulu sebentar biar coding fresh! ☕");
           setTimeout(() => {
             characters.hermes.walkTo(new THREE.Vector3(ZONES.frontendDesk.x, 0, ZONES.frontendDesk.z + 0.8), () => {
               characters.hermes.isSitting = true;
             });
-          }, 6000);
+          }, 5000);
         });
-      } else if (type === 'laporan') {
-        characters.antigravity.speak("Laporan: Branch main GitHub up-to-date, website UMKM siap dipromosikan!");
       }
     }
 
@@ -1035,39 +1038,29 @@
       });
     }
 
-    // Modal API Config Handlers
     function openConfigModal() {
-      const modal = document.getElementById('config-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      const savedKey = localStorage.getItem('gemini_api_key');
-      if (savedKey) document.getElementById('api-key-input').value = savedKey;
+      document.getElementById('config-modal').classList.remove('hidden');
+      document.getElementById('config-modal').classList.add('flex');
     }
 
     function closeConfigModal() {
-      const modal = document.getElementById('config-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
+      document.getElementById('config-modal').classList.add('hidden');
+      document.getElementById('config-modal').classList.remove('flex');
     }
 
     function saveApiKey() {
       const key = document.getElementById('api-key-input').value.trim();
       if (key) {
         localStorage.setItem('gemini_api_key', key);
-        alert('API Key berhasil disimpan di browser!');
-      } else {
-        localStorage.removeItem('gemini_api_key');
-        alert('Mode Autonomous Default diaktifkan.');
       }
       closeConfigModal();
     }
 
-    // Raycast on Scene
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
     function onSceneClick(event) {
-      if (event.clientY < 75 || event.clientY > window.innerHeight - 150) return;
+      if (event.clientY < 70 || event.clientY > window.innerHeight - 130) return;
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -1083,17 +1076,19 @@
     }
 
     function onWindowResize() {
+      const isMobile = isMobileDevice();
+      camera.fov = isMobile ? 55 : 45;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     const AUTONOMOUS_DIALOGS = [
-      { agent: 'antigravity', msg: "Pastikan commit git terbaru sudah di-push ke GitHub ya tim!" },
-      { agent: 'hermes', msg: "Desain katalog responsif & tombol WA 0858-2291-2826 sudah aktif!" },
-      { agent: 'opencode', msg: "Koneksi 9Router dan SQLite API stabil dengan respon cepat." },
-      { agent: 'antigravity', msg: "Bagus! User Ergus bisa mengarahkan kita langsung dari HP atau laptop." },
-      { agent: 'hermes', msg: "Touch control di smartphone sangat mulus dan interaktif!" },
+      { agent: 'antigravity', msg: "Pastikan commit git terbaru sudah di-push ke GitHub!" },
+      { agent: 'hermes', msg: "Katalog responsif & tombol WA 0858-2291-2826 aktif!" },
+      { agent: 'opencode', msg: "Koneksi 9Router dan SQLite API stabil beroperasi." },
+      { agent: 'antigravity', msg: "User bisa mengarahkan kita langsung dari HP dengan mulus." },
+      { agent: 'hermes', msg: "UI mobile touch sekarang sangat lega dan nyaman disentuh!" },
       { agent: 'opencode', msg: "Semua sistem backend siap mendukung deployment!" }
     ];
 
