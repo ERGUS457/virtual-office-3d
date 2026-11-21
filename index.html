@@ -975,12 +975,18 @@
     }
 
     function updateAiModeBadge() {
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const apiKey = localStorage.getItem('gemini_api_key');
       const badge = document.getElementById('ai-mode-badge');
       const statusText = document.getElementById('ai-status-text');
       const dot = document.getElementById('key-dot');
 
-      if (apiKey) {
+      if (isLocalHost) {
+        badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+        badge.innerText = 'LOCAL AGENTS (PC)';
+        statusText.innerText = 'Hermes CLI & 9Router Active';
+        if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400';
+      } else if (apiKey) {
         badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
         badge.innerText = 'REAL AI (GEMINI)';
         statusText.innerText = 'Live LLM Active';
@@ -993,7 +999,7 @@
       }
     }
 
-    // --- PIPELINE BERPIKIR TIGA AGEN ---
+    // --- PIPELINE BERPIKIR TIGA AGEN (NATIVE LOCAL + GEMINI REMOTE) ---
     async function executeUserCommand(rawPrompt = null) {
       const inputEl = document.getElementById('user-command-input');
       const prompt = rawPrompt || inputEl.value.trim();
@@ -1004,6 +1010,7 @@
       sendBtn.disabled = true;
       sendBtn.innerHTML = `<span>⏳</span>`;
 
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const hasRealAi = !!localStorage.getItem('gemini_api_key');
 
       // 1. Antigravity Berpikir & Mendelegasikan
@@ -1014,7 +1021,29 @@
       let frontResponse = null;
       let backResponse = null;
 
-      if (hasRealAi) {
+      // JIKA DI LAPTOP LOKAL: Panggil server.py (/api/chat) yang terkoneksi langsung ke hermes.exe & 9Router!
+      if (isLocalHost) {
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: prompt, agent: 'all' })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.status === 'ok') {
+              leadResponse = data.data.antigravity;
+              frontResponse = data.data.hermes;
+              backResponse = data.data.opencode;
+            }
+          }
+        } catch (e) {
+          console.warn("Local API call failed, falling back to client mode:", e);
+        }
+      }
+
+      // JIKA DI HP / REMOTE (GitHub Pages): Panggil Gemini API jika ada API Key
+      if (!leadResponse && hasRealAi) {
         leadResponse = await callGeminiAI(
           "Anda adalah Antigravity, Project Lead / Team Leader AI di Levantry. Anda menerima instruksi dari user. Berikan arahan koordinasi singkat kepada tim (Hermes & OpenCode).",
           prompt
@@ -1037,7 +1066,7 @@
       // 2. Hermes (Frontend) Berpikir & Eksekusi
       setTimeout(async () => {
         characters.hermes.speak("Merancang solusi tampilan...");
-        if (hasRealAi) {
+        if (!frontResponse && hasRealAi) {
           frontResponse = await callGeminiAI(
             "Anda adalah Hermes, Frontend Specialist AI di Levantry. Jelaskan solusi UI/UX atau styling apa yang akan Anda buat untuk tugas ini.",
             prompt
@@ -1059,7 +1088,7 @@
         characters.opencode.speak("Mengecek sistem backend & database...");
         characters.opencode.walkTo(new THREE.Vector3(ZONES.serverRack.x - 1.2, 0, ZONES.serverRack.z));
 
-        if (hasRealAi) {
+        if (!backResponse && hasRealAi) {
           backResponse = await callGeminiAI(
             "Anda adalah OpenCode, Backend Engineer AI di Levantry. Jelaskan solusi teknis API, database, atau arsitektur server untuk tugas ini.",
             prompt
