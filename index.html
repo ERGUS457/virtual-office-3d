@@ -143,6 +143,8 @@
             <span id="ai-mode-badge" class="px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-slate-800 text-slate-400 border border-slate-700">SIMULASI</span>
           </div>
           <div class="flex items-center gap-1.5 text-[8.5px] text-slate-400 font-mono mt-0.5">
+            <span id="ai-status-text" class="text-slate-300">3 Agen Siaga</span>
+            <span>•</span>
             <span class="text-emerald-400 flex items-center gap-0.5" title="MCP Web Search Aktif">🌐 Web</span>
             <span>•</span>
             <span class="text-sky-400 flex items-center gap-0.5" title="MCP GitHub Aktif (ERGUS457)">🐙 GitHub</span>
@@ -654,8 +656,16 @@
       window.addEventListener('resize', onWindowResize, false);
       window.addEventListener('pointerdown', onSceneClick, false);
 
-      updateAiModeBadge();
-      startAutonomousRoutines();
+      try {
+        updateAiModeBadge();
+      } catch (e) {
+        console.warn("updateAiModeBadge failed:", e);
+      }
+      try {
+        startAutonomousRoutines();
+      } catch (e) {
+        console.warn("startAutonomousRoutines failed:", e);
+      }
       animate();
     }
 
@@ -1243,19 +1253,25 @@
       const dot = document.getElementById('key-dot');
 
       if (isLocalHost) {
-        badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
-        badge.innerText = 'LOCAL AGENTS (PC)';
-        statusText.innerText = 'Hermes CLI & 9Router Active';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+          badge.innerText = 'LOCAL AGENTS (PC)';
+        }
+        if (statusText) statusText.innerText = 'Hermes & 9Router';
         if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-cyan-400';
       } else if (apiKey) {
-        badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-        badge.innerText = 'REAL AI (GEMINI)';
-        statusText.innerText = 'Gemini 3.8 Flash Active';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+          badge.innerText = 'REAL AI (GEMINI)';
+        }
+        if (statusText) statusText.innerText = 'Gemini 3.8 Flash';
         if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400';
       } else {
-        badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
-        badge.innerText = 'SIMULASI';
-        statusText.innerText = '3 Agen Siaga';
+        if (badge) {
+          badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
+          badge.innerText = 'SIMULASI';
+        }
+        if (statusText) statusText.innerText = '3 Agen Siaga';
         if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400';
       }
     }
@@ -1623,7 +1639,11 @@
       renderer.render(scene, camera);
     }
 
-    window.addEventListener('DOMContentLoaded', init);
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
