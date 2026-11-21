@@ -4,6 +4,7 @@ import json
 import urllib.request
 import os
 import sys
+import re
 from concurrent.futures import ThreadPoolExecutor
 
 PORT = 3333
@@ -12,6 +13,14 @@ DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 ROUTER_URL = "http://localhost:20128/v1/chat/completions"
 ROUTER_KEY = "sk-0900c4ba0ad55579-ohgl0d-7ddf1c78"
 
+def clean_text(text):
+    if not text:
+        return ""
+    # Strip raw LaTeX math syntax: $1 + (4 \times 82)$ -> 1 + (4 × 82)
+    text = text.replace(r"\times", "×").replace(r"\cdot", "·").replace(r"\div", "÷")
+    text = re.sub(r"\$([^\$]+)\$", r"\1", text)
+    return text.strip()
+
 def call_9router(system_prompt, user_prompt, model="levantry"):
     try:
         payload = {
@@ -19,10 +28,10 @@ def call_9router(system_prompt, user_prompt, model="levantry"):
             "stream": False,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Instruksi: {user_prompt}\nJawab ringkas dalam 1-2 kalimat Bahasa Indonesia:"}
+                {"role": "user", "content": f"Pertanyaan/Instruksi: {user_prompt}\nJawab secara alami, lugas, dan akurat dalam 1-2 kalimat Bahasa Indonesia:"}
             ],
-            "temperature": 0.7,
-            "max_tokens": 120
+            "temperature": 0.5,
+            "max_tokens": 140
         }
         data = json.dumps(payload).encode("utf-8")
         req = urllib.request.Request(
@@ -35,28 +44,29 @@ def call_9router(system_prompt, user_prompt, model="levantry"):
         )
         with urllib.request.urlopen(req, timeout=10) as response:
             res_data = json.loads(response.read().decode("utf-8"))
-            return res_data["choices"][0]["message"]["content"].strip()
+            raw_text = res_data["choices"][0]["message"]["content"].strip()
+            return clean_text(raw_text)
     except Exception as e:
         print(f"[9Router Error]: {e}", file=sys.stderr)
         return None
 
 def get_antigravity_response(prompt):
     return call_9router(
-        "Anda adalah Antigravity, Project Lead / AI Coordinator di Levantry HQ. Anda sedang memimpin sprint website UMKM Sambas bersama Hermes (Frontend) dan OpenCode (Backend). Berikan arahan koordinasi tugas singkat kepada tim dalam 1-2 kalimat Bahasa Indonesia yang ramah, profesional, dan tegas.",
+        "Anda adalah Antigravity, Project Lead & AI Coordinator di Levantry. Tanggapi pertanyaan user secara langsung, cerdas, dan lugas. Jika pertanyaan umum/matematika, jawab hasilnya dengan tepat. Jika tugas proyek, koordinasikan langkah kerja dengan jelas tanpa memaksa topik yang tidak relevan. Jangan gunakan sintaks LaTeX atau simbol rumit.",
         prompt
-    ) or f"Instruksi diterima: '{prompt}'. Saya koordinasikan sprint ini bersama Hermes dan OpenCode."
+    ) or f"Instruksi diterima: '{prompt}'. Saya koordinasikan solusinya bersama tim."
 
 def get_hermes_response(prompt):
     return call_9router(
-        "Anda adalah Hermes, Frontend & UI/UX Specialist AI di Levantry HQ. Berikan solusi desain antarmuka, layout responsif, atau komponen frontend untuk tugas ini dalam 1-2 kalimat Bahasa Indonesia yang jelas.",
+        "Anda adalah Hermes, Frontend & UI/UX Specialist di Levantry. Berikan jawaban yang ramah, visual, dan jelas. Jika pertanyaan umum/matematika, jelaskan dengan alur logika yang mudah dipahami. Hindari penggunaan format LaTeX simbol dolar.",
         prompt
-    ) or "Komponen UI responsif dan tombol checkout WhatsApp siap saya implementasikan."
+    ) or "Solusi antarmuka dan pengalaman pengguna siap saya susun."
 
 def get_opencode_response(prompt):
     return call_9router(
-        "Anda adalah OpenCode, Backend Engineer & Database Architect di Levantry HQ. Berikan tanggapan teknis mengenai API, struktur database, atau optimasi server untuk instruksi ini dalam 1-2 kalimat Bahasa Indonesia yang jelas.",
+        "Anda adalah OpenCode, Backend Engineer & Database Architect di Levantry. Berikan jawaban logis, teknis, dan presisi. Jika pertanyaan umum/matematika, berikan verifikasi perhitungan dengan jelas. Tulis angka dan rumus secara teks biasa (jangan pakai $ atau LaTeX).",
         prompt
-    ) or "API endpoint dan database JSON sudah dioptimasi, latensi server aman di bawah 15ms."
+    ) or "Sistem komputasi dan arsitektur data siap memproses instruksi ini."
 
 class OfficeRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -80,7 +90,6 @@ class OfficeRequestHandler(http.server.SimpleHTTPRequestHandler):
                 req_json = json.loads(post_body.decode("utf-8"))
                 prompt = req_json.get("prompt", "").strip()
 
-                # Run all 3 agents concurrently in parallel threads (Super Fast!)
                 with ThreadPoolExecutor(max_workers=3) as executor:
                     f_lead = executor.submit(get_antigravity_response, prompt)
                     f_front = executor.submit(get_hermes_response, prompt)

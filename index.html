@@ -455,9 +455,25 @@
     }
   </script>
 
-  <!-- Result Panel Handlers -->
+  <!-- Result Panel Handlers & Clean Formatter -->
   <script>
     let isResultPanelOpen = false;
+
+    function formatAiText(text) {
+      if (!text) return "";
+      let s = text.trim();
+      // Remove raw LaTeX math syntax and convert symbols
+      s = s.replace(/\\times/g, "×").replace(/\\cdot/g, "·").replace(/\\div/g, "÷");
+      s = s.replace(/\$([^\$]+)\$/g, "$1");
+      // Markdown bold & italic
+      s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-bold">$1</strong>');
+      s = s.replace(/\*([^*]+)\*/g, '<em class="text-amber-200 not-italic font-semibold">$1</em>');
+      // Inline code
+      s = s.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px] text-amber-300 border border-slate-700">$1</code>');
+      // Newlines to br
+      s = s.replace(/\n/g, '<br>');
+      return s;
+    }
 
     function toggleResultPanel(forceOpen = null) {
       const panel = document.getElementById('result-panel');
@@ -478,22 +494,22 @@
 
     function updateResultColumn(prompt, leadText, frontText, backText) {
       document.getElementById('res-user-prompt').innerText = `"${prompt}"`;
-      document.getElementById('res-lead-body').innerHTML = leadText.replace(/\n/g, '<br>');
-      document.getElementById('res-front-body').innerHTML = frontText.replace(/\n/g, '<br>');
-      document.getElementById('res-back-body').innerHTML = backText.replace(/\n/g, '<br>');
+      document.getElementById('res-lead-body').innerHTML = formatAiText(leadText);
+      document.getElementById('res-front-body').innerHTML = formatAiText(frontText);
+      document.getElementById('res-back-body').innerHTML = formatAiText(backText);
 
       const now = new Date();
       document.getElementById('result-timestamp').innerText = `Selesai: ${now.toLocaleTimeString()}`;
       document.getElementById('result-badge-status').innerText = 'SELESAI';
       document.getElementById('result-badge-status').className = 'px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
 
-      // Auto open panel so user immediately sees results!
       toggleResultPanel(true);
     }
 
     function copyCardText(id) {
       const el = document.getElementById(id);
       if (el) {
+        // Copy clean plain text without HTML tags
         navigator.clipboard.writeText(el.innerText);
         alert('Teks berhasil disalin!');
       }
@@ -1222,7 +1238,7 @@
       // JIKA DI HP / REMOTE (GitHub Pages): Panggil Gemini API jika ada API Key
       if (!leadResponse && hasRealAi) {
         leadResponse = await callGeminiAI(
-          "Anda adalah Antigravity, Project Lead / Team Leader AI di Levantry. Anda menerima instruksi dari user. Berikan arahan koordinasi singkat kepada tim (Hermes & OpenCode).",
+          "Anda adalah Antigravity, Project Lead di Levantry. Tanggapi pertanyaan user secara langsung, cerdas, dan akurat. Jangan gunakan simbol LaTeX ($ atau \\times).",
           prompt
         );
       }
@@ -1234,7 +1250,7 @@
         } else if (pLow.includes('cepat') || pLow.includes('server')) {
           leadResponse = `Baik, prioritas sprint sekarang optimasi kecepatan loading dan efisiensi database.`;
         } else {
-          leadResponse = `Instruksi diterima: "${prompt}". Saya koordinasikan pembagian tugas ke Hermes dan OpenCode.`;
+          leadResponse = `Instruksi diterima: "${prompt}". Saya koordinasikan solusinya bersama tim.`;
         }
       }
 
@@ -1242,10 +1258,10 @@
 
       // 2. Hermes (Frontend) Berpikir & Eksekusi
       setTimeout(async () => {
-        characters.hermes.speak("Merancang solusi tampilan...");
+        characters.hermes.speak("Merancang solusi...");
         if (!frontResponse && hasRealAi) {
           frontResponse = await callGeminiAI(
-            "Anda adalah Hermes, Frontend Specialist AI di Levantry. Jelaskan solusi UI/UX atau styling apa yang akan Anda buat untuk tugas ini.",
+            "Anda adalah Hermes, Frontend & UI/UX Specialist di Levantry. Berikan penjelasan yang ramah, visual, dan mudah dipahami tanpa format LaTeX ($).",
             prompt
           );
         }
@@ -1262,12 +1278,12 @@
 
       // 3. OpenCode (Backend) Berpikir & Eksekusi
       setTimeout(async () => {
-        characters.opencode.speak("Mengecek sistem backend & database...");
+        characters.opencode.speak("Menganalisis sistem...");
         characters.opencode.walkTo(new THREE.Vector3(ZONES.serverRack.x - 1.2, 0, ZONES.serverRack.z));
 
         if (!backResponse && hasRealAi) {
           backResponse = await callGeminiAI(
-            "Anda adalah OpenCode, Backend Engineer AI di Levantry. Jelaskan solusi teknis API, database, atau arsitektur server untuk tugas ini.",
+            "Anda adalah OpenCode, Backend Engineer di Levantry. Berikan tanggapan yang logis, presisi, dan teknis. Tulis rumus atau angka biasa tanpa format LaTeX ($).",
             prompt
           );
         }
