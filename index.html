@@ -61,7 +61,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
     .glass-panel-lg {
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.94);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(255, 255, 255, 0.14);
@@ -112,7 +112,6 @@
       background: rgba(255, 255, 255, 0.2);
       border-radius: 4px;
     }
-    /* Smooth panel drawer transition */
     .slide-panel {
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
     }
@@ -205,7 +204,7 @@
       <div id="office-banner" class="glass-pill px-3.5 py-1.5 rounded-full flex items-center gap-2 self-center border border-amber-500/30 max-w-[95%]">
         <span class="w-1.5 h-1.5 rounded-full bg-amber-400 pulse-dot shrink-0"></span>
         <p id="banner-text" class="text-[11px] text-slate-200 truncate font-medium">
-          <span class="text-amber-300 font-bold">Antigravity:</span> Ketik pertanyaan/instruksi di bawah untuk melihat hasilnya.
+          <span class="text-amber-300 font-bold">Antigravity:</span> Ketik pertanyaan apa saja di bawah, jawaban real AI akan muncul di Kolom Hasil.
         </p>
       </div>
 
@@ -237,7 +236,7 @@
         <input 
           id="user-command-input" 
           type="text" 
-          placeholder="Ketik pertanyaan/tugas (hasilnya akan muncul di kolom)..." 
+          placeholder="Ketik pertanyaan (hasil akan muncul di kolom hasil)..." 
           class="bg-transparent border-0 text-white placeholder-slate-400 text-xs focus:outline-none w-full"
           onkeydown="if(event.key === 'Enter') executeUserCommand()"
         >
@@ -255,9 +254,7 @@
 
   </div>
 
-  <!-- ======================================================== -->
-  <!-- DEDICATED RESULT COLUMN / PANEL HASIL PERTANYAAN USER     -->
-  <!-- ======================================================== -->
+  <!-- DEDICATED RESULT COLUMN / PANEL HASIL PERTANYAAN USER -->
   <aside id="result-panel" class="slide-panel fixed top-0 right-0 z-40 w-full sm:w-[420px] md:w-[460px] h-full p-3 sm:p-4 pointer-events-none translate-x-full">
     <div class="w-full h-full glass-panel-lg rounded-3xl p-4 sm:p-5 flex flex-col pointer-events-auto border border-amber-500/30 overflow-hidden shadow-2xl">
       
@@ -312,7 +309,7 @@
             </button>
           </div>
           <div class="text-xs text-slate-200 leading-relaxed font-sans" id="res-lead-body">
-            Siap memimpin koordinasi sprint dan mendelegasikan tugas ke Hermes dan OpenCode.
+            Siap memimpin koordinasi sprint dan menjawab pertanyaan secara langsung.
           </div>
         </div>
 
@@ -329,7 +326,7 @@
             </button>
           </div>
           <div class="text-xs text-slate-200 leading-relaxed font-sans" id="res-front-body">
-            Siap merancang tampilan antarmuka, layout responsif mobile, dan komponen interaktif.
+            Siap memberikan tanggapan ramah dan solusi antarmuka yang mudah dipahami.
           </div>
         </div>
 
@@ -346,7 +343,7 @@
             </button>
           </div>
           <div class="text-xs text-slate-200 leading-relaxed font-sans" id="res-back-body">
-            Siap menyiapkan endpoint API, query database, struktur data JSON, dan optimasi performa.
+            Siap memberikan tanggapan teknis yang logis, presisi, dan terverifikasi.
           </div>
         </div>
 
@@ -354,7 +351,7 @@
 
       <!-- Panel Footer Actions -->
       <div class="pt-3 border-t border-slate-800 shrink-0 flex items-center justify-between gap-2 text-xs">
-        <span class="text-[10px] text-slate-400 font-mono">Status: Terkoneksi ke AI Agent</span>
+        <span class="text-[10px] text-slate-400 font-mono">Real-time AI Responses</span>
         <button onclick="copyAllResults()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition shadow-md shadow-amber-500/20">
           <i data-lucide="copy-check" class="w-3.5 h-3.5"></i>
           <span>Salin Semua</span>
@@ -364,7 +361,7 @@
     </div>
   </aside>
 
-  <!-- API Key Config Modal -->
+  <!-- API Key Config Modal with Instant Live Test -->
   <div id="config-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="glass-pill p-5 rounded-3xl max-w-sm w-full border border-amber-500/40 shadow-2xl">
       <div class="flex items-center justify-between mb-3">
@@ -373,8 +370,8 @@
             <i data-lucide="brain" class="w-4 h-4"></i>
           </div>
           <div>
-            <h3 class="font-bold text-sm text-white">Aktifkan Real AI Thinking</h3>
-            <p class="text-[10px] text-slate-400">Hubungkan ke Google Gemini LLM</p>
+            <h3 class="font-bold text-sm text-white">Pengaturan Gemini AI Key</h3>
+            <p class="text-[10px] text-slate-400">Aktifkan Real LLM Thinking di HP</p>
           </div>
         </div>
         <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white p-1">
@@ -383,25 +380,37 @@
       </div>
       
       <p class="text-[11px] text-slate-300 mb-3 leading-relaxed">
-        Masukkan <b>Gemini API Key</b> gratis Anda agar Antigravity, Hermes, dan OpenCode <b>benar-benar berpikir secara LIVE dari AI</b> setiap kali Anda memberi perintah dari HP!
+        Masukkan Google Gemini API Key Anda. Setelah disimpan, ketiga agen akan <b>100% menggunakan model Gemini 2.0 / 1.5 Flash</b> asli langsung di HP Anda!
       </p>
 
-      <div class="mb-3">
+      <div class="mb-2">
         <label class="block text-[10px] font-mono text-slate-400 mb-1">Google Gemini API Key:</label>
         <input id="api-key-input" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
-        <a href="https://aistudio.google.com/apikey" target="_blank" class="text-[10px] text-amber-400 hover:underline inline-flex items-center gap-1 mt-1 font-mono">
-          <span>Dapatkan API Key gratis di Google AI Studio</span>
+      </div>
+
+      <!-- Test Connection Button & Status -->
+      <div class="flex items-center justify-between mb-3">
+        <button onclick="testApiKey()" class="text-[10px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 flex items-center gap-1 transition">
+          <i data-lucide="zap" class="w-3 h-3"></i>
+          <span>Tes Koneksi API</span>
+        </button>
+        <a href="https://aistudio.google.com/apikey" target="_blank" class="text-[10px] text-amber-400 hover:underline inline-flex items-center gap-1 font-mono">
+          <span>Ambil Key Gratis</span>
           <i data-lucide="external-link" class="w-3 h-3"></i>
         </a>
       </div>
 
-      <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400 mb-4 leading-normal">
-        🔒 <b>Aman:</b> API Key hanya disimpan di memori HP Anda (LocalStorage), tidak pernah dikirim ke GitHub atau server manapun.
+      <div id="api-test-status" class="text-[10px] mb-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-slate-400">
+        Belum diuji. Klik "Tes Koneksi API" untuk memastikan key aktif.
+      </div>
+
+      <div class="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-[10px] text-slate-400 mb-4">
+        🔒 <b>Aman:</b> API Key hanya disimpan di memori HP Anda (LocalStorage), tidak dikirim ke GitHub.
       </div>
 
       <div class="flex items-center justify-end gap-2">
         <button onclick="clearApiKey()" class="px-3 py-1.5 text-xs rounded-xl bg-slate-800 text-rose-400 hover:bg-slate-700">Hapus</button>
-        <button onclick="saveApiKey()" class="px-4 py-1.5 text-xs rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-md shadow-amber-500/20">Aktifkan Real AI</button>
+        <button onclick="saveApiKey()" class="px-4 py-1.5 text-xs rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-bold shadow-md shadow-amber-500/20">Simpan & Aktifkan</button>
       </div>
     </div>
   </div>
@@ -462,15 +471,11 @@
     function formatAiText(text) {
       if (!text) return "";
       let s = text.trim();
-      // Remove raw LaTeX math syntax and convert symbols
       s = s.replace(/\\times/g, "×").replace(/\\cdot/g, "·").replace(/\\div/g, "÷");
       s = s.replace(/\$([^\$]+)\$/g, "$1");
-      // Markdown bold & italic
       s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-bold">$1</strong>');
       s = s.replace(/\*([^*]+)\*/g, '<em class="text-amber-200 not-italic font-semibold">$1</em>');
-      // Inline code
       s = s.replace(/`([^`]+)`/g, '<code class="bg-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px] text-amber-300 border border-slate-700">$1</code>');
-      // Newlines to br
       s = s.replace(/\n/g, '<br>');
       return s;
     }
@@ -509,7 +514,6 @@
     function copyCardText(id) {
       const el = document.getElementById(id);
       if (el) {
-        // Copy clean plain text without HTML tags
         navigator.clipboard.writeText(el.innerText);
         alert('Teks berhasil disalin!');
       }
@@ -1134,37 +1138,48 @@
       step();
     }
 
-    // --- REAL AI THINKING ENGINE VIA GEMINI API ---
+    // --- REAL AI THINKING ENGINE VIA GEMINI API (MODELS: gemini-2.0-flash / gemini-1.5-flash) ---
     async function callGeminiAI(systemPrompt, userPrompt) {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) return null;
 
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: `${systemPrompt}\n\nInstruksi User: ${userPrompt}\n\nJawab dalam Bahasa Indonesia yang ringkas, jelas, dan solutif (maksimal 2 kalimat):` }]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 120
-            }
-          })
-        });
+      const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-lite', 'gemini-1.5-pro'];
 
-        if (!response.ok) return null;
-        const data = await response.json();
-        return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-      } catch (e) {
-        console.error("Gemini API call failed:", e);
-        return null;
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: `${systemPrompt}\n\nPertanyaan/Instruksi User: ${userPrompt}\n\nJawab secara langsung, akurat, dan jelas dalam 1-2 kalimat Bahasa Indonesia tanpa format LaTeX ($):` }]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.6,
+                maxOutputTokens: 140
+              }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (text) return text;
+          } else {
+            const errData = await response.json().catch(() => ({}));
+            console.warn(`Gemini model ${model} error (${response.status}):`, errData);
+          }
+        } catch (e) {
+          console.warn(`Fetch error for ${model}:`, e);
+        }
       }
+
+      console.error("All Gemini models failed. Please check API Key and quota.");
+      return null;
     }
 
     function updateAiModeBadge() {
@@ -1182,7 +1197,7 @@
       } else if (apiKey) {
         badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
         badge.innerText = 'REAL AI (GEMINI)';
-        statusText.innerText = 'Live LLM Active';
+        statusText.innerText = 'Gemini 2.0 Flash Active';
         if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400';
       } else {
         badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
@@ -1206,7 +1221,6 @@
       const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const hasRealAi = !!localStorage.getItem('gemini_api_key');
 
-      // 1. Antigravity Berpikir & Mendelegasikan
       characters.antigravity.speak("Sedang memproses pertanyaan & menganalisis instruksi...");
       characters.antigravity.walkTo(new THREE.Vector3(ZONES.whiteboard.x + 1.2, 0, ZONES.whiteboard.z + 0.5));
 
@@ -1235,14 +1249,29 @@
         }
       }
 
-      // JIKA DI HP / REMOTE (GitHub Pages): Panggil Gemini API jika ada API Key
+      // JIKA DI HP / REMOTE (GitHub Pages): Panggil Gemini API secara paralel untuk 3 agen!
       if (!leadResponse && hasRealAi) {
-        leadResponse = await callGeminiAI(
-          "Anda adalah Antigravity, Project Lead di Levantry. Tanggapi pertanyaan user secara langsung, cerdas, dan akurat. Jangan gunakan simbol LaTeX ($ atau \\times).",
-          prompt
-        );
+        const [lRes, fRes, bRes] = await Promise.all([
+          callGeminiAI(
+            "Anda adalah Antigravity, Project Lead & AI Coordinator di Levantry. Jawab pertanyaan user secara langsung, cerdas, dan akurat. Jangan gunakan simbol LaTeX ($).",
+            prompt
+          ),
+          callGeminiAI(
+            "Anda adalah Hermes, Frontend Specialist di Levantry. Berikan penjelasan yang ramah, visual, dan mudah dipahami tanpa simbol LaTeX ($).",
+            prompt
+          ),
+          callGeminiAI(
+            "Anda adalah OpenCode, Backend Engineer di Levantry. Berikan tanggapan yang logis, presisi, dan teknis tanpa simbol LaTeX ($).",
+            prompt
+          )
+        ]);
+
+        leadResponse = lRes;
+        frontResponse = fRes;
+        backResponse = bRes;
       }
 
+      // Fallback jika belum pasang API Key di HP
       if (!leadResponse) {
         const pLow = prompt.toLowerCase();
         if (pLow.includes('katalog') || pLow.includes('produk') || pLow.includes('tenun')) {
@@ -1259,13 +1288,6 @@
       // 2. Hermes (Frontend) Berpikir & Eksekusi
       setTimeout(async () => {
         characters.hermes.speak("Merancang solusi...");
-        if (!frontResponse && hasRealAi) {
-          frontResponse = await callGeminiAI(
-            "Anda adalah Hermes, Frontend & UI/UX Specialist di Levantry. Berikan penjelasan yang ramah, visual, dan mudah dipahami tanpa format LaTeX ($).",
-            prompt
-          );
-        }
-
         if (!frontResponse) {
           frontResponse = "Tampilan UI responsif sedang saya susun dengan Tailwind CSS agar cepat dan menarik di HP!";
         }
@@ -1274,19 +1296,12 @@
         characters.hermes.walkTo(new THREE.Vector3(ZONES.frontendDesk.x, 0, ZONES.frontendDesk.z + 0.8), () => {
           characters.hermes.isSitting = true;
         });
-      }, 2500);
+      }, 2000);
 
       // 3. OpenCode (Backend) Berpikir & Eksekusi
       setTimeout(async () => {
         characters.opencode.speak("Menganalisis sistem...");
         characters.opencode.walkTo(new THREE.Vector3(ZONES.serverRack.x - 1.2, 0, ZONES.serverRack.z));
-
-        if (!backResponse && hasRealAi) {
-          backResponse = await callGeminiAI(
-            "Anda adalah OpenCode, Backend Engineer di Levantry. Berikan tanggapan yang logis, presisi, dan teknis. Tulis rumus atau angka biasa tanpa format LaTeX ($).",
-            prompt
-          );
-        }
 
         if (!backResponse) {
           backResponse = "Endpoint API dan database produk sudah dioptimasi, waktu respons stabil di bawah 15ms!";
@@ -1301,7 +1316,7 @@
 
         // UPDATE HASIL KE KOLOM HASIL & BUKA PANEL OTOMATIS!
         updateResultColumn(prompt, leadResponse, frontResponse, backResponse);
-      }, 5500);
+      }, 4500);
 
       // 4. Wrap-up
       setTimeout(() => {
@@ -1312,7 +1327,7 @@
         sendBtn.disabled = false;
         sendBtn.innerHTML = `<span>Kirim</span><i data-lucide="send" class="w-3 h-3"></i>`;
         lucide.createIcons();
-      }, 9500);
+      }, 8500);
     }
 
     function sendPresetTask(type) {
@@ -1379,12 +1394,48 @@
       document.getElementById('config-modal').classList.remove('hidden');
       document.getElementById('config-modal').classList.add('flex');
       const savedKey = localStorage.getItem('gemini_api_key');
-      if (savedKey) document.getElementById('api-key-input').value = savedKey;
+      if (savedKey) {
+        document.getElementById('api-key-input').value = savedKey;
+      }
     }
 
     function closeConfigModal() {
       document.getElementById('config-modal').classList.add('hidden');
       document.getElementById('config-modal').classList.remove('flex');
+    }
+
+    async function testApiKey() {
+      const keyInput = document.getElementById('api-key-input').value.trim();
+      const testStatus = document.getElementById('api-test-status');
+      if (!keyInput) {
+        testStatus.innerHTML = '<span class="text-rose-400 font-semibold">Masukkan API Key terlebih dahulu!</span>';
+        return;
+      }
+
+      testStatus.innerHTML = '<span class="text-amber-300 animate-pulse font-semibold">Sedang menguji koneksi ke Google Gemini...</span>';
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyInput}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: "Halo, tes 1 kata." }] }]
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "OK";
+          testStatus.innerHTML = `<span class="text-emerald-400 font-semibold">✅ Berhasil! Terhubung ke Gemini 2.0 Flash (Respon: "${reply}")</span>`;
+        } else {
+          const err = await res.json().catch(() => ({}));
+          const errMsg = err?.error?.message || res.statusText;
+          testStatus.innerHTML = `<span class="text-rose-400 font-semibold">❌ Gagal (${res.status}): ${errMsg}</span>`;
+        }
+      } catch (e) {
+        testStatus.innerHTML = `<span class="text-rose-400 font-semibold">❌ Gagal koneksi: ${e.message}</span>`;
+      }
     }
 
     function saveApiKey() {
@@ -1394,12 +1445,13 @@
       }
       updateAiModeBadge();
       closeConfigModal();
-      characters.antigravity.speak("Real AI Thinking Berhasil Diaktifkan! Kami sekarang terhubung langsung ke Google Gemini.");
+      characters.antigravity.speak("Real AI Thinking Berhasil Diaktifkan! Kami sekarang terhubung langsung ke Google Gemini 2.0 Flash.");
     }
 
     function clearApiKey() {
       localStorage.removeItem('gemini_api_key');
       document.getElementById('api-key-input').value = '';
+      document.getElementById('api-test-status').innerHTML = 'Belum diuji.';
       updateAiModeBadge();
       closeConfigModal();
       characters.antigravity.speak("Mode simulasi aktif kembali.");
