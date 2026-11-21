@@ -1142,12 +1142,12 @@
       step();
     }
 
-    // --- REAL AI THINKING ENGINE VIA GEMINI API (MODELS: gemini-2.0-flash / gemini-1.5-flash) ---
+    // --- REAL AI THINKING ENGINE VIA GEMINI API (MODEL: gemini-3.8-flash) ---
     async function callGeminiAI(systemPrompt, userPrompt) {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) return null;
 
-      const models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-lite', 'gemini-1.5-pro'];
+      const models = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
 
       for (const model of models) {
         try {
@@ -1201,7 +1201,7 @@
       } else if (apiKey) {
         badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
         badge.innerText = 'REAL AI (GEMINI)';
-        statusText.innerText = 'Gemini 2.0 Flash Active';
+        statusText.innerText = 'Gemini 3.8 Flash Active';
         if (dot) dot.className = 'absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400';
       } else {
         badge.className = 'px-1.5 py-0.2 rounded-full text-[8px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30';
@@ -1416,29 +1416,44 @@
         return;
       }
 
-      testStatus.innerHTML = '<span class="text-amber-300 animate-pulse font-semibold">Sedang menguji koneksi ke Google Gemini...</span>';
+      testStatus.innerHTML = '<span class="text-amber-300 animate-pulse font-semibold">Sedang menguji koneksi ke Google Gemini 3.8 Flash...</span>';
 
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keyInput}`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "Halo, tes 1 kata." }] }]
-          })
-        });
+      const testModels = ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+      let successModel = null;
+      let replyText = null;
+      let lastErrMsg = null;
+      let lastStatus = null;
 
-        if (res.ok) {
-          const data = await res.json();
-          const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "OK";
-          testStatus.innerHTML = `<span class="text-emerald-400 font-semibold">✅ Berhasil! Terhubung ke Gemini 2.0 Flash (Respon: "${reply}")</span>`;
-        } else {
-          const err = await res.json().catch(() => ({}));
-          const errMsg = err?.error?.message || res.statusText;
-          testStatus.innerHTML = `<span class="text-rose-400 font-semibold">❌ Gagal (${res.status}): ${errMsg}</span>`;
+      for (const m of testModels) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${keyInput}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Halo, tes 1 kata." }] }]
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "OK";
+            successModel = m;
+            break;
+          } else {
+            const err = await res.json().catch(() => ({}));
+            lastErrMsg = err?.error?.message || res.statusText;
+            lastStatus = res.status;
+          }
+        } catch (e) {
+          lastErrMsg = e.message;
         }
-      } catch (e) {
-        testStatus.innerHTML = `<span class="text-rose-400 font-semibold">❌ Gagal koneksi: ${e.message}</span>`;
+      }
+
+      if (successModel) {
+        testStatus.innerHTML = `<span class="text-emerald-400 font-semibold">Berhasil! Terhubung ke ${successModel} (Respon: "${replyText}")</span>`;
+      } else {
+        testStatus.innerHTML = `<span class="text-rose-400 font-semibold">Gagal (${lastStatus || 'Error'}): ${lastErrMsg}</span>`;
       }
     }
 
@@ -1449,7 +1464,7 @@
       }
       updateAiModeBadge();
       closeConfigModal();
-      characters.antigravity.speak("Real AI Thinking Berhasil Diaktifkan! Kami sekarang terhubung langsung ke Google Gemini 2.0 Flash.");
+      characters.antigravity.speak("Real AI Thinking Berhasil Diaktifkan! Kami sekarang terhubung langsung ke Google Gemini 3.8 Flash.");
     }
 
     function clearApiKey() {
